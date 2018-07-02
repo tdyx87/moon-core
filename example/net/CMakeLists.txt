@@ -1,0 +1,2 @@
+ADD_EXECUTABLE(example_net_tcpserver TcpServer.cxx)
+TARGET_LINK_LIBRARIES(example_net_tcpserver moon)

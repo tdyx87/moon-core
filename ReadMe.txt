@@ -1,0 +1,7 @@
+bin存放可执行文件
+example存放demo样例
+include存放moon项目依赖头文件
+install存放moong项目输出文件
+libs存放项目依赖库
+moon存放源码
+test存放单元测试
