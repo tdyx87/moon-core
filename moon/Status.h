@@ -25,33 +25,33 @@ class Slice;
 class Status
 {
 public:	
-	Status() :  mState(NULL) {}
-	~Status();
+	  Status() :  mState(NULL) {}
+	  ~Status();
 
-	Status(const Status& rhs);
+	  Status(const Status& rhs);
     Status& operator=(const Status& rhs);	
 
-	static Status ok() {return Status();}
+	  static Status ok() {return Status();}
 	
-	static Status error(int code, const Slice& msg, const Slice& msg2=Slice()) {
-	    return Status(code, msg, msg2);
-	}
-	static Status error(const Slice& msg){
-	    return error(-1, msg);
-	}
+	  static Status error(int code, const Slice& msg, const Slice& msg2=Slice()) {
+	      return Status(code, msg, msg2);
+	  }
+	  static Status error(const Slice& msg){
+	      return error(-1, msg);
+	  }
 
-	static Status posixError(int code, const Slice& msg=Slice());
+	  static Status posixError(int code, const Slice& msg=Slice());
 
-	operator bool() const {NULL == mState;}
-	bool isOk() const {return NULL == mState;}
+	  operator bool() const {NULL == mState;}
+	  bool isOk() const {return NULL == mState;}
 
-	int errorCode() const;
+	  int errorCode() const;
 
-	const char* error() const;
-	std::string errorString() const;
+	  const char* error() const;
+	  std::string errorString() const;
 private:
-	Status(int code, const Slice& msg, const Slice& msg2);
-	static const char* copyState(const char* s);
+	  Status(int code, const Slice& msg, const Slice& msg2);
+	  static const char* copyState(const char* s);
 private:
     /**
       OK status has a null mState.  Otherwise, mState is a new[] array of the following form:
@@ -64,7 +64,7 @@ private:
 };  // ~Status
 
 inline Status::Status(const Status& rhs) {
-  mState = (rhs.mState == NULL) ? NULL : copyState(rhs.mState);
+    mState = (rhs.mState == NULL) ? NULL : copyState(rhs.mState);
 }
 
 inline Status& Status::operator=(const Status& rhs) {

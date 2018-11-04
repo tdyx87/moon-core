@@ -47,7 +47,6 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::
 	mTcpAcceptor->setNewConnectionCallback(boost::bind(&TcpServer::onNewConnection, this, _1, _2));
 }
 
-
 TcpServer::~TcpServer()
 {
 }
@@ -57,8 +56,6 @@ void TcpServer::setThreadNum(int numThreads)
 	assert(0 <= numThreads);
     mThreadPool->setThreadNum(numThreads);
 }
-
-
 
 void TcpServer::start()
 {

@@ -25,10 +25,8 @@ namespace net
 class InetAddress
 {
 public:
-	/** 构造函数 */
 	explicit InetAddress(uint16_t port = 0);
-
-	/** 构造函数 */
+	
 	InetAddress(const char* ip, uint16_t port);
 
 	InetAddress(const struct sockaddr_in& addr) : mSockaddr(addr) { }

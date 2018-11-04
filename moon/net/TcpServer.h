@@ -53,20 +53,17 @@ public:
 	int connecionSize()const {return mTcpConnection.size();}
 private:
 	/** 
-    @description:
-    Called when a connection is completed, this call is not thread safe, but in loop
+    * Called when a connection is completed, this call is not thread safe, but in loop
     */
 	void onNewConnection(int fd, const InetAddress& peerAddr);
     
 	/** 
-    @description:
-    Called when a connection is disconnected, this call is thread safe
+    * Called when a connection is disconnected, this call is thread safe
     */
     void onRemoveConnection(const TcpConnectionPtr& conn);
     
 	/** 
-    @description:
-    Called when a connection is disconnected, this call is not thread safe, but in loop
+    * Called when a connection is disconnected, this call is not thread safe, but in loop
     */
 	void onRemoveConnectionInLoop(const TcpConnectionPtr& conn);
 private:

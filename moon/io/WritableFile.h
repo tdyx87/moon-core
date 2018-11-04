@@ -26,14 +26,14 @@ typedef boost::shared_ptr<WritableFile> WritableFilePtr;
 class WritableFile : boost::noncopyable
 {
 public:
-	WritableFile();
-	virtual ~WritableFile();
+    WritableFile();
+	  virtual ~WritableFile();
 
-	virtual Status append(const Slice& data) = 0;
+	  virtual Status append(const Slice& data) = 0;
     virtual Status close() = 0;
     virtual Status flush() = 0;
 public:
-	static WritableFilePtr getDefaultWritableFile(const std::string &filepath);
+	  static WritableFilePtr getDefaultWritableFile(const std::string &filepath);
 };  // ~WritableFile
 
 
