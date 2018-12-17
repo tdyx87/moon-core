@@ -10,25 +10,23 @@
 #define MOON_OS_EVENTLOOP_H_
 
 #include <moon/Functor.h>
+#include <moon/noncopyable.h>
 #include <moon/Timestamp.h>
-#include <moon/thread/CurrentThread.h>
-#include <moon/thread/MutexLock.h>
 #include <moon/os/TimerCallback.h>
 #include <moon/os/TimerTaskId.h>
+#include <moon/thread/CurrentThread.h>
+#include <moon/thread/MutexLock.h>
 
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-
+#include <memory>
 #include <vector>
 
 namespace moon
 {
-
 class Poller;
 class EventChannel;
 class Timer;
 
-class EventLoop : boost::noncopyable
+class EventLoop : noncopyable
 {
 public:
 	EventLoop();
@@ -77,8 +75,7 @@ public:
 	
 	void assertInLoopThread()
 	{
-		if (!isInLoopThread())
-		{
+		if (!isInLoopThread()) {
 			abortNotInLoopThread();
 		}
 	}
@@ -86,6 +83,8 @@ public:
 	bool isInLoopThread() const { return mThreadId == moon::CurrentThread::tid(); }
 
 	const Poller& getPoller()  {return *mPoller.get();}
+
+	void deleteLater(const std::shared_ptr<void> &obj) {mDelayedDeletes.push_back(obj);}
 private:
 	/** 更新I/O事件 */
 	void updateEventChannel(EventChannel* pEventChannel);
@@ -111,16 +110,16 @@ private:
 
 	const pid_t mThreadId;
 	EventChannelList mEventChannelList;
-	boost::scoped_ptr<Poller> mPoller;
-	boost::scoped_ptr<Timer> mTimer;
+	std::unique_ptr<Poller> mPoller;
+	std::unique_ptr<Timer> mTimer;
 
 	int mWakeupFd;
-	boost::scoped_ptr<EventChannel> mWakeupChannel;
+	std::unique_ptr<EventChannel> mWakeupChannel;
     
 	MutexLock mMutexLock;
 	std::vector<Functor> mPendingFunctors; 
+	std::vector<std::shared_ptr<void>> mDelayedDeletes;
 };
-
 
 
 }  // ~moon

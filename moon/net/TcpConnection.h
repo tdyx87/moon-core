@@ -9,26 +9,23 @@
 #ifndef MOON_NET_TCPCONNNECTION_H_
 #define MOON_NET_TCPCONNNECTION_H_
 
+#include <moon/noncopyable.h>
+#include <moon/net/Buffer.h>
+#include <moon/net/NetDefine.h>
 #include <moon/net/InetAddress.h>
 #include <moon/net/Socket.h>
-#include <moon/net/Buffer.h>
-#include <moon/net/Callbacks.h>
 #include <moon/os/EventChannel.h>
 
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-
+#include <memory>
 #include <string>
-
 
 namespace moon
 {
 class EventLoop;
+
 namespace net
 {
-
-class TcpConnection : boost::noncopyable, public boost::enable_shared_from_this<TcpConnection>
+class TcpConnection : noncopyable, public std::enable_shared_from_this<TcpConnection>
 {
 	// states of the connection
 	enum State { kDisconnected, kConnecting, kConnected, kDisconnecting };
@@ -66,20 +63,20 @@ private:
     virtual void onWrite();
     virtual void onError();
 	  
-
 	void sendInLoop();
 	void sendInLoop(const void* message, size_t len);
     void shutdownInLoop();
 private:
 	friend class EventChannel;
     friend class TcpServer;
+    friend class Server;
 
     State mState;  // connection state
     EventLoop *mEventLoop;
 	std::string mName;  // connection name
 
-	boost::scoped_ptr<Socket> mSocket;	
-	boost::scoped_ptr<EventChannel> mEventChannel;
+	std::unique_ptr<Socket> mSocket;	
+	std::unique_ptr<EventChannel> mEventChannel;
 
     const InetAddress mLocalAddress;
     const InetAddress mPeerAddress;

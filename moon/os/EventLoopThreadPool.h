@@ -9,10 +9,10 @@
 #ifndef MOON_OS_EVENTLOOPTHREADPOOL_H_
 #define MOON_OS_EVENTLOOPTHREADPOOL_H_
 
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <moon/noncopyable.h>
 
+#include <functional>
+#include <memory>
 #include <vector>
 
 namespace moon
@@ -21,9 +21,9 @@ namespace moon
 class EventLoop;
 class EventLoopThread;
 
-class EventLoopThreadPool : public boost::noncopyable
+class EventLoopThreadPool : public noncopyable
 {
-	typedef boost::function<void(EventLoop*)> ThreadInitCallback;
+	typedef std::function<void(EventLoop*)> ThreadInitCallback;
 public:
 	EventLoopThreadPool(EventLoop* baseLoop);
     ~EventLoopThreadPool();
@@ -41,11 +41,9 @@ private:
 	bool mStarted;
 	int mNumThreads;
 	int mNext;
-	boost::ptr_vector<EventLoopThread> mThreads;
+	std::vector<std::unique_ptr<EventLoopThread>> mThreads;
 	std::vector<EventLoop*> mEventLoops;
 };
-
-
 
 
 }  // ~moon

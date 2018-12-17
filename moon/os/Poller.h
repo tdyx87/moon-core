@@ -4,20 +4,7 @@
   that can be found in the License file.
 
   Author: Mugui Zhou
-*/
-#ifndef MOON_OS_POLLER_H_
-#define MOON_OS_POLLER_H_
 
-#include <moon/os/EventLoop.h>
-
-#include <map>
-#include <vector>
-
-namespace moon
-{
-class EventChannel;
-
-/**
   Poller用于监控EventChannel对象上的事件变化，一个Poller对象可以监控多个EventChannel对象，每个Poller对象
   都维护一个EventChannel队列，用于保存正在监控的EventChannel对象。
   每个Poller对象都在而且只能在一个EventLoop对象之中，每个Poller对象的所有方法都应该在对应的EventLoop中对象中执行。
@@ -31,6 +18,18 @@ class EventChannel;
   poll()用于等待监控队列中有事件发生的EventChannel对象集，调用方线程将处于阻塞状态直到有一个或者多个EventChannel对象的事件被触发，或者超时时间已到。
   poll()方法返回时会设置当前有事件被触发的EventChannel对象集。
 */
+#ifndef MOON_OS_POLLER_H_
+#define MOON_OS_POLLER_H_
+
+#include <moon/os/EventLoop.h>
+
+#include <map>
+#include <vector>
+
+namespace moon
+{
+class EventChannel;
+
 class Poller
 {
 protected:
@@ -42,6 +41,8 @@ public:
 
 	Poller(EventLoop* loop);
     virtual ~Poller();
+
+    static Poller* newDefaultPoller(EventLoop* loop);
     
 	/**
 	  此方法等待EventChannel列表中事件的触发，此方法将会阻塞调用方（如果设置了超时时间）直到有一个或者多个EventChannel对象有
@@ -78,7 +79,7 @@ public:
 	*/
 	virtual bool hasEventChannel(EventChannel* channel) const;
 
-	virtual int size() const {return mEventChannels.size();}
+	virtual size_t size() const {return mEventChannels.size();}
 
 	/**
 	  逻辑测试方法，内部使用。
@@ -92,8 +93,6 @@ private:
 	EventLoop* mEventLoop;
 
 };
-
-
 
 }  // ~moon
 

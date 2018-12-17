@@ -6,21 +6,21 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_TIMER_H_
-#define MOON_OS_TIMER_H_
+#ifndef MOON_NET_TIMER_H_
+#define MOON_NET_TIMER_H_
 
 #include <moon/AtomicInteger.h>
 #include <moon/os/EventChannel.h>
 #include <moon/os/TimerTaskId.h>
 
-#include <boost/shared_ptr.hpp>
-
 #include <stdint.h>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
-namespace moon {
+namespace moon
+{
 
 class EventLoop;
 
@@ -43,7 +43,7 @@ class EventLoop;
 */
 class Timer
 {
-	typedef boost::shared_ptr<TimerTask> TimerTaskPtr;
+	typedef std::shared_ptr<TimerTask> TimerTaskPtr;
 	typedef std::multimap<long, TimerTaskPtr> TimerTaskList; 
 public:
 	explicit Timer(EventLoop* loop);

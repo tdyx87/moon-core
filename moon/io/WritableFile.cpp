@@ -31,7 +31,7 @@ public:
 	}
 
 	~PosixWritableFile() {
-	    if (mPos >= 0) {
+	    if (mPos > 0) {
             // Ignoring any potential errors
             this->close();
         }

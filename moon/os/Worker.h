@@ -6,17 +6,18 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_THREAD_WORKER_H_
-#define MOON_THREAD_WORKER_H_
+#ifndef MOON_OS_WORKER_H_
+#define MOON_OS_WORKER_H_
 
 #include <moon/AtomicInteger.h>
 #include <moon/Functor.h>
 #include <moon/thread/MutexLock.h>
 
-#include <boost/shared_ptr.hpp>
+#include <functional>
+#include <memory>
 
-namespace moon{
-
+namespace moon
+{
 class EventLoop;
 class EventLoopThread;
 class ScheduleJob;
@@ -25,8 +26,8 @@ class Timestamp;
 class Worker
 {
 public:
-	typedef boost::function<void (ScheduleJob *) > OnJobCompletedListener;
-	Worker(const std::string &name, const OnJobCompletedListener &listener=OnJobCompletedListener());
+	typedef std::function<void (ScheduleJob *) > OnJobCompletedListener;
+	Worker(const std::string &name, const OnJobCompletedListener &listener = OnJobCompletedListener());
 	~Worker();
 	
 	virtual void start();
@@ -41,7 +42,7 @@ private:
 	std::string mName;
 	
 	EventLoop *mEventLoop;
-	boost::shared_ptr<EventLoopThread> mEventLoopThread;
+	std::shared_ptr<EventLoopThread> mEventLoopThread;
 
 	OnJobCompletedListener mJobCompletedListener;
 };

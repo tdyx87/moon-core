@@ -1,7 +1,6 @@
 # include <moon/Properties.h>
-# include <moon/Double.h>
-# include <moon/Integer.h>
-# include <moon/Long.h>
+# include <moon/Logger.h>
+# include <moon/Number.h>
 
 #include <fstream>
 
@@ -43,35 +42,35 @@ int Properties::getInt(const std::string& name, int defaultValue) const
         return defaultValue;
     }
 
-    return Integer::parseInt(mProperties.at(name), defaultValue);
+    return Number::parseInt(mProperties.at(name), defaultValue);
 }
 
-int Properties::getLong(const std::string& name, long defaultValue) const
+long Properties::getLong(const std::string& name, long defaultValue) const
 {
     if (mProperties.count(name) == 0)
     {
         return defaultValue;
     }
 
-    return Long::parseLong(mProperties.at(name), defaultValue);
+    return Number::parseLong(mProperties.at(name), defaultValue);
 }
 
-int Properties::getDouble(const std::string& name, double defaultValue) const
+double Properties::getDouble(const std::string& name, double defaultValue) const
 {
     if (mProperties.count(name) == 0) 
     {
         return defaultValue;
     }
 
-    return Double::parseDouble(mProperties.at(name), defaultValue);
+    return Number::parseDouble(mProperties.at(name), defaultValue);
 }
 
-int Properties::load(const std::string& fileName) 
+bool Properties::load(const std::string& fileName) 
 {
 	std::ifstream in(fileName.c_str());
 	if (!in) 
 	{
-		return __LINE__;		
+		return false;		
 	}
 
 	while (in) 
@@ -94,21 +93,25 @@ int Properties::load(const std::string& fileName)
 void Properties::parseLine(const std::string &line) 
 {
     size_t index = line.find('=');
-	if (std::string::npos == index) 
-	{
-		// TODO: should print some warning logs
+	if (std::string::npos == index) {
+		LOGGER_WARN("invalid line:%s", line.c_str());
 		return ;
 	}
 
-	if (index == 0) 
-	{
-		// TODO: should print some warning logs
+	if (index == 0) {
+		LOGGER_WARN("invalid line:%s", line.c_str());
         return ;
 	}
 
-	std::string key = line.substr(0, index);
+	std::string key = trimSpace(line.substr(0, index));
+	if (key.empty()) {
+        LOGGER_WARN("invalid line:%s", line.c_str());
+		return ;
+	}
 	std::string value = line.substr(index + 1);
-    mProperties[key] = value;
+    mProperties[key] = trimSpace(value);
+    LOGGER_DEBUG("key[%s] = %s", key.c_str(), value.c_str());
 }
+
 
 }  //~ moon

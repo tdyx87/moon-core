@@ -1,3 +1,11 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/net/ByteOrder.h>
 #include <moon/net/SocketOps.h>
 #include <moon/TypeCast.h>
@@ -51,8 +59,7 @@ int sockets::createSocket()
 int sockets::createNonblockingSocket()
 {
 	int sockfd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (sockfd >= 0)
-	{
+	if (sockfd >= 0) {
 	    setNonBlockAndCloseOnExec(sockfd);
 	}
 
@@ -63,7 +70,7 @@ int sockets::createNonblockingSocket()
 /** 将一个本地地址绑定到该套接字上 */
 int sockets::bind(int sockfd, const struct sockaddr_in& addr)
 {
-	return ::bind(sockfd, (struct sockaddr *)&addr, static_cast<socklen_t>(sizeof addr));
+    return ::bind(sockfd, reinterpret_cast<struct sockaddr *>(const_cast<struct sockaddr_in *>(&addr)), static_cast<socklen_t>(sizeof addr));
 }
 
 /** 设置套接字为非阻塞 */
@@ -155,8 +162,7 @@ ssize_t sockets::write(int sockfd, const void *buf, size_t count)
 /** 获取地址sockaddr_in的IP+PORT信息转(IP:port的形式) */
 void sockets::toIpPort(char* buf, size_t size, const struct sockaddr_in& addr)
 {
-	if ( (buf == NULL) || (size <= 0) )
-	{
+	if ( (buf == NULL) || (size <= 0) ) {
 		return ;
 	}
 
@@ -169,8 +175,7 @@ void sockets::toIpPort(char* buf, size_t size, const struct sockaddr_in& addr)
 /** 获取地址sockaddr_in的IP信息 */
 void sockets::toIp(char* buf, size_t size, const struct sockaddr_in& addr)
 {
-	if ( (buf == NULL) || (size <= 0) )
-	{
+	if ( (buf == NULL) || (size <= 0) ) {
 		return ;
 	}
 
@@ -182,12 +187,9 @@ int sockets::getSocketError(int sockfd)
 	int optval;
 	socklen_t optlen = static_cast<socklen_t>(sizeof optval);
 
-	if (::getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0)
-	{
+	if (::getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0) {
 	    return errno;
-	}
-	else
-	{
+	} else {
 	    return optval;
 	}
 }
@@ -197,8 +199,7 @@ struct sockaddr_in sockets::getLocalAddr(int sockfd)
 	struct sockaddr_in localaddr;
 	bzero(&localaddr, sizeof localaddr);
 	socklen_t addrlen = static_cast<socklen_t>(sizeof localaddr);
-	if (::getsockname(sockfd, sockaddr_cast(&localaddr), &addrlen) < 0)
-	{
+	if (::getsockname(sockfd, sockaddr_cast(&localaddr), &addrlen) < 0 ) {
 		// TODO
 	}
 	return localaddr;
@@ -209,8 +210,7 @@ struct sockaddr_in sockets::getPeerAddr(int sockfd)
 	struct sockaddr_in peeraddr;
 	bzero(&peeraddr, sizeof peeraddr);
 	socklen_t addrlen = static_cast<socklen_t>(sizeof peeraddr);
-	if (::getpeername(sockfd, sockaddr_cast(&peeraddr), &addrlen) < 0)
-	{	
+	if (::getpeername(sockfd, sockaddr_cast(&peeraddr), &addrlen) < 0) {	
 		// TODO
 	}
 	return peeraddr;

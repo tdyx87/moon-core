@@ -1,10 +1,10 @@
-#include <moon/thread/Worker.h>
-#include <moon/thread/ScheduleJob.h>
+#include <moon/os/Worker.h>
+
+#include <moon/Logger.h>
+#include <moon/os/ScheduleJob.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThread.h>
-#include <moon/logger/Logger.h>
 
-#include <boost/bind.hpp>
 #include <assert.h>
 
 namespace moon{
@@ -37,27 +37,22 @@ void Worker::shutdown()
 
 void Worker::submit(ScheduleJob *job)
 {
-	mEventLoop->runInLoop(boost::bind(&Worker::onHandleJob, this, job));
+	mEventLoop->runInLoop(std::bind(&Worker::onHandleJob, this, job));
 }
 
 void Worker::onHandleJob(ScheduleJob *job)
 {
+	assert(job != NULL);
     Runnable *runnable = job->runnable();
-    if (NULL != runnable)
-	{
+    if (NULL != runnable) {
 		runnable->run();
-		if (job->autoRelease()) 
-		{
+		if (job->autoRelease()) {
 			delete runnable;
 			runnable = NULL;
 		}
-    }
-	else if (job->callback()) 
-	{
+    } else if (job->callback()) {
 	    job->callback()();
-	}
-	else
-	{
+	} else {
 	    LOGGER_WARN("Unknown job, can not handle this job.");
 	}
 

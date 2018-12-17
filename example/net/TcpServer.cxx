@@ -3,16 +3,17 @@
 #include <moon/net/TcpConnection.h>
 #include <moon/logger/Logger.h>
 #include <moon/os/EventLoop.h>
-#include <moon/Integer.h>
-#include <boost/bind.hpp> 
-#include <boost/shared_ptr.hpp> 
+#include <moon/Number.h>
 
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include <sys/epoll.h>
+#include <sys/poll.h>
+#include <functional>
+#include <memory>
 #include <string>
 
 using std::string;
@@ -69,6 +70,43 @@ void onClientMessage(const TcpConnectionPtr& conn, Buffer &buf)
 	LOGGER_TRACE("response:%s", sendData.c_str());
 }
 
+static void startServer1()
+{
+	uint16_t listenPort = static_cast<uint16_t>(Number::parseInt(g_listenPortString));    
+	InetAddress objInetAddress(listenPort);
+	g_pobjTcpServer = new TcpServer(&g_objEventLoop, objInetAddress, "test");
+	g_pobjTcpServer->setThreadNum(2);
+	g_pobjTcpServer->setThreadInitCallback(std::bind(startCallback, _1));
+	g_pobjTcpServer->setConnectionCallback(std::bind(onClientConnection, _1));
+	g_pobjTcpServer->setMessageCallback(std::bind(onClientMessage, _1, _2));
+    
+	g_pobjTcpServer->start();
+	g_objEventLoop.loop();	
+
+}
+//static_assert(sizeof(void *) == 4, "64-bit code generation is not supported.");
+
+class Test
+{
+public:
+    void TestWork(int index)
+    {
+    	printf("TestWork 1\n");
+    }
+    void TestWork(int * index)
+    {
+       printf("TestWork 2\n");
+    }
+};
+
+int test4()
+{
+    Test test;
+    //test.TestWork(NULL);
+    test.TestWork(nullptr);
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {  
 	if (NULL == argv[1])
@@ -78,18 +116,7 @@ int main(int argc, char* argv[])
 	}
 	g_listenPortString = string(argv[1]);
 	LOGGER_TRACE("监听端口:%s", argv[1]);
-
-	int listenPort = Integer::parseInt(g_listenPortString);    
-
-	InetAddress objInetAddress(listenPort);
-	g_pobjTcpServer = new TcpServer(&g_objEventLoop, objInetAddress, "test");
-	g_pobjTcpServer->setThreadNum(2);
-	g_pobjTcpServer->setThreadInitCallback(boost::bind(startCallback, _1));
-	g_pobjTcpServer->setConnectionCallback(boost::bind(onClientConnection, _1));
-	g_pobjTcpServer->setMessageCallback(boost::bind(onClientMessage, _1, _2));
-    
-	g_pobjTcpServer->start();
-	g_objEventLoop.loop();	
+	test4();
 
 	return 0;
 }

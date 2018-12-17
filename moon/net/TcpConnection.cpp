@@ -1,9 +1,16 @@
-#include <moon/net/TcpConnection.h>
-#include <moon/net/SocketOps.h>
-#include <moon/logger/Logger.h>
-#include <moon/os/EventLoop.h>
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
 
-#include <boost/bind.hpp>
+  Author: Mugui Zhou
+*/
+
+#include <moon/net/TcpConnection.h>
+
+#include <moon/Logger.h>
+#include <moon/net/SocketOps.h>
+#include <moon/os/EventLoop.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -27,10 +34,10 @@ TcpConnection::TcpConnection(int sockfd, const string& name, EventLoop* loop, co
 	mState = kConnecting;
 	LOGGER_TRACE("TcpConnectio::create. state:%d", mState);
 	
-	mEventChannel->setReadCallback(boost::bind(&TcpConnection::onRead, this));
-	mEventChannel->setWriteCallback(boost::bind(&TcpConnection::onWrite, this));
-	mEventChannel->setCloseCallback(boost::bind(&TcpConnection::onClose, this));
-	mEventChannel->setErrorCallback(boost::bind(&TcpConnection::onError, this));    
+	mEventChannel->setReadCallback(std::bind(&TcpConnection::onRead, this));
+	mEventChannel->setWriteCallback(std::bind(&TcpConnection::onWrite, this));
+	mEventChannel->setCloseCallback(std::bind(&TcpConnection::onClose, this));
+	mEventChannel->setErrorCallback(std::bind(&TcpConnection::onError, this));    
 }
 
 TcpConnection::~TcpConnection()
@@ -51,9 +58,7 @@ void TcpConnection::connectEstablished()
 
 void TcpConnection::connectDestroyed()
 {
-//    LOGGER_TRACE("TcpConnection::connectDestroyed. state:%d", mState);
-	if (kConnected == mState)
-	{
+	if (kConnected == mState) {
 		mState = kDisconnected;
 		mEventChannel->remove();
 		mConnectionCallback(shared_from_this());	
@@ -64,21 +69,14 @@ void TcpConnection::connectDestroyed()
 
 void TcpConnection::onRead()
 {
-//	LOGGER_TRACE("TcpConnectio::onRead. state:%d", mState);
 	const ssize_t iRead = mInputBuffer.readFd(mEventChannel->getFd());
-	if (iRead > 0)
-	{
-		if (NULL != mMessageCallback)
-		{
+	if (iRead > 0) {
+		if (NULL != mMessageCallback) {
 			mMessageCallback(shared_from_this(), mInputBuffer);
 		}
-	}
-	else if (0 == iRead)
-	{
+	} else if (0 == iRead) {
 		this->onClose();
-	}
-	else
-	{
+	} else {
 		LOGGER_ERROR("TcpConnection::onRead failed.");
 		this->onClose();
 	}	
@@ -86,24 +84,18 @@ void TcpConnection::onRead()
 
 void TcpConnection::onWrite()
 {	
-//	LOGGER_TRACE("TcpConnectio::onWrite. state:%d", mState);
-	const ssize_t iWrite = sockets::write(mEventChannel->getFd(), mOutputBuffer.peekFirst(), mOutputBuffer.readableBytes());
-    if (iWrite >= 0)
-	{
+	const ssize_t iWrite = sockets::write(mEventChannel->getFd(), mOutputBuffer.data(), mOutputBuffer.readableBytes());
+    if (iWrite >= 0) {
 		mOutputBuffer.retrieve(iWrite);
-		if (0 == mOutputBuffer.readableBytes())
-		{
+		if (0 == mOutputBuffer.readableBytes()) {
 			mEventChannel->disableWriting();       
 
 			// if the state is kDisconnecting, which means this connection is expected to be close when the writing completed
-			if (kDisconnecting == mState)
-			{
+			if (kDisconnecting == mState) {
 				this->shutdownInLoop();
 			}
 		}
-	}
-	else
-	{
+	} else {
 		LOGGER_ERROR("TcpConnection::onWrite");		
 		this->onClose();
 	}
@@ -111,7 +103,6 @@ void TcpConnection::onWrite()
 
 void TcpConnection::onClose()
 {
-//    LOGGER_TRACE("TcpConnection::onClose. state:%d", mState);
 	assert( (kConnected == mState) || (kDisconnecting == mState) );
 
 	mState = kDisconnected;
@@ -131,50 +122,40 @@ void TcpConnection::onError()
 /** 发送数据 */
 void TcpConnection::send(const void* message, size_t len)
 {
-//	LOGGER_TRACE("TcpConnectio::send state:%d", mState);
-	if (kConnected == mState)
-	{
-		if (mEventLoop->isInLoopThread())
-		{
+	if (kConnected == mState) {
+		if (mEventLoop->isInLoopThread()) {
 			sendInLoop(message, len);
-		}
-		else
-		{
+		} else {
 			mSaveDataBuffer.append(static_cast<const char*>(message), len);
-			mEventLoop->runInLoop(boost::bind(&TcpConnection::sendInLoop, this));
+			void (TcpConnection::*fp)() = &TcpConnection::sendInLoop;
+			mEventLoop->runInLoop(std::bind(fp, this));
 		}
 	}	
 }
 
 void TcpConnection::send(Buffer* buf)
 {
-//	LOGGER_TRACE("TcpConnectio::send1 state:%d", mState);
-	if (kConnected == mState)
-	{
-		if (mEventLoop->isInLoopThread())
-		{
-			sendInLoop(buf->peekFirst(), buf->readableBytes());
+	if (kConnected == mState) {
+		if (mEventLoop->isInLoopThread()) {
+			sendInLoop(buf->data(), buf->readableBytes());
 			buf->retrieveAll();
-		}
-		else
-		{
+		} else {
 			buf->swap(mSaveDataBuffer);
 			buf->retrieveAll();
-			mEventLoop->runInLoop(boost::bind(&TcpConnection::sendInLoop, this));
+			void (TcpConnection::*fp)() = &TcpConnection::sendInLoop;
+			mEventLoop->runInLoop(std::bind(fp, this));
 		}
 	}
 }
 
 void TcpConnection::sendInLoop()
 {
-//	LOGGER_TRACE("TcpConnectio::sendInLoop state:%d", mState);
-	sendInLoop(mSaveDataBuffer.peekFirst(), mSaveDataBuffer.readableBytes());
+	sendInLoop(mSaveDataBuffer.data(), mSaveDataBuffer.readableBytes());
 	mSaveDataBuffer.retrieveAll();
 }
 
 void TcpConnection::sendInLoop(const void* message, size_t len)
 {
-//	LOGGER_TRACE("TcpConnectio::sendInLoop1 len[%d]state:%d", len, mState);
 	mEventLoop->assertInLoopThread();
 
 	ssize_t iWrite = 0;
@@ -182,19 +163,13 @@ void TcpConnection::sendInLoop(const void* message, size_t len)
 
 	// if can send directly
 	bool sendDirectly = (!mEventChannel->isWriting()) && (mOutputBuffer.readableBytes() == 0);
-	if (sendDirectly)
-	{
+	if (sendDirectly) {
 		iWrite = sockets::write(mEventChannel->getFd(), message, len);
-		//LOGGER_TRACE("sendInLoop send directly, iWrite[%d]", iWrite);
-		if (iWrite >= 0)
-		{
+		if (iWrite >= 0) {
 			remaining = len - iWrite;		
-		}	
-		else
-		{
+		} else {
 			iWrite = 0;
-			if (errno != EWOULDBLOCK)
-			{
+			if (errno != EWOULDBLOCK) {
 				LOGGER_ERROR("TcpConnection::send:%s", strerror(errno));
 				return ;
 			}			
@@ -204,13 +179,10 @@ void TcpConnection::sendInLoop(const void* message, size_t len)
 	assert(remaining <= len);
 	
 
-	if (remaining > 0)
-	{
+	if (remaining > 0) {
 		LOGGER_TRACE("sendInLoop send not directly");
-		// append the remaining to m_objOutputBuffer 
 		mOutputBuffer.append(static_cast<const char*>(message) + iWrite, remaining);
-		if (!mEventChannel->isWriting())
-		{
+		if (!mEventChannel->isWriting()) {
 			mEventChannel->enableWriting();
 		}
 	}	
@@ -218,19 +190,16 @@ void TcpConnection::sendInLoop(const void* message, size_t len)
 
 void TcpConnection::shutdown()
 {
-	if (kConnected == mState)
-	{
+	if (kConnected == mState) {
 		mState = kDisconnecting;	
-		mEventLoop->runInLoop(boost::bind(&TcpConnection::shutdownInLoop, this));		
+		mEventLoop->runInLoop(std::bind(&TcpConnection::shutdownInLoop, this));		
 	}	
 }
 
 void TcpConnection::shutdownInLoop()
 {
-//    LOGGER_TRACE("TcpConnection::shutdownInLoop. state:%d", mState);
 	mEventLoop->assertInLoopThread();
-    if (!mEventChannel->isWriting())
-    {
+    if (!mEventChannel->isWriting()) {
         // we are not writing
         mSocket->shutdownWrite();
     }

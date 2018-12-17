@@ -1,13 +1,20 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/net/TcpServer.h>
-#include <moon/net/SocketOps.h>
+
+#include <moon/Logger.h>
 #include <moon/net/Buffer.h>
+#include <moon/net/SocketOps.h>
 #include <moon/net/TcpAcceptor.h>
 #include <moon/net/TcpConnection.h>
-#include <moon/logger/Logger.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThreadPool.h>
-
-#include <boost/bind.hpp>
 
 #include <assert.h>
 
@@ -44,7 +51,7 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::
 	mConnectionCallback = defaultConnectionCallback;
 	mMessageCallback = defaultMessageCallback;
 
-	mTcpAcceptor->setNewConnectionCallback(boost::bind(&TcpServer::onNewConnection, this, _1, _2));
+	mTcpAcceptor->setNewConnectionCallback(std::bind(&TcpServer::onNewConnection, this, _1, _2));
 }
 
 TcpServer::~TcpServer()
@@ -59,11 +66,9 @@ void TcpServer::setThreadNum(int numThreads)
 
 void TcpServer::start()
 {
-	if (!mIsStarted)
-	{
+	if (!mIsStarted) {
 		assert(!mTcpAcceptor->listenning());
-		if (mTcpAcceptor->listen() != 0)
-		{
+		if (mTcpAcceptor->listen() != 0) {
 			return ;
 		}
 
@@ -89,15 +94,15 @@ void TcpServer::onNewConnection(int fd, const InetAddress& peerAddr)
 
 	conn->setConnectionCallback(mConnectionCallback);
 	conn->setMessageCallback(mMessageCallback);
-	conn->setCloseCallback(boost::bind(&TcpServer::onRemoveConnection, this, _1));
+	conn->setCloseCallback(std::bind(&TcpServer::onRemoveConnection, this, _1));
     
 	// 一定要使用runInLoop,不要直接调用connectEstablished,因为可能不在当前loop所在的线程
-	ioLoop->runInLoop(boost::bind(&TcpConnection::connectEstablished, conn));  
+	ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished, conn));  
 }
 
 void TcpServer::onRemoveConnection(const TcpConnectionPtr& conn)
 {
-	mEventLoop->runInLoop(boost::bind(&TcpServer::onRemoveConnectionInLoop, this, conn));
+	mEventLoop->runInLoop(std::bind(&TcpServer::onRemoveConnectionInLoop, this, conn));
 }
 
 void TcpServer::onRemoveConnectionInLoop(const TcpConnectionPtr& conn)
@@ -110,7 +115,7 @@ void TcpServer::onRemoveConnectionInLoop(const TcpConnectionPtr& conn)
 	EventLoop* ioLoop = conn->getLoop();
     
 	// 一定要使用queueInLoop,不要直接调用connectDestroyed()
-	ioLoop->queueInLoop(boost::bind(&TcpConnection::connectDestroyed, conn));  
+	ioLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));  
 
 	//conn->connectDestroyed();
 }

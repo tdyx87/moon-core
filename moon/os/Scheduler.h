@@ -5,11 +5,11 @@
 
   Author: Mugui Zhou
 */
-#ifndef MOON_THREAD_SCHEDULER_H_
-#define MOON_THREAD_SCHEDULER_H_
+#ifndef MOON_OS_SCHEDULER_H_
+#define MOON_OS_SCHEDULER_H_
 
 #include <moon/Functor.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace moon
@@ -19,7 +19,7 @@ class ScheduleJob;
 class Timestamp;
 class Scheduler;
 
-typedef boost::shared_ptr<Scheduler> SchedulerPtr;
+typedef std::shared_ptr<Scheduler> SchedulerPtr;
 
 class Scheduler
 {

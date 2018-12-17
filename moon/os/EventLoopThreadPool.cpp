@@ -1,7 +1,16 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/os/EventLoopThreadPool.h>
+
+#include <moon/TypeCast.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThread.h>
-#include <moon/TypeCast.h>
 
 #include <assert.h>
 
@@ -26,16 +35,14 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
 
 	mStarted = true;
 
-	for (int i = 0; i < mNumThreads; ++i)
-	{
+	for (int i = 0; i < mNumThreads; ++i) {
 		EventLoopThread* t = new EventLoopThread("", cb);
-        mThreads.push_back(t);
+        mThreads.push_back(std::unique_ptr<EventLoopThread>(t));
         mEventLoops.push_back(t->startLoop());
 	}
     
 	// if mNumThreads is 0, which means this server wanted to be single thread
-	if ( (0 == mNumThreads) && cb)
-	{
+	if ( (0 == mNumThreads) && cb) {
 		cb(mBaseLoop);
 	}
 }
@@ -48,13 +55,11 @@ EventLoop* EventLoopThreadPool::getNextLoop()
 
 	EventLoop* loop = mBaseLoop;
 
-	if (!mEventLoops.empty())
-	{
+	if (!mEventLoops.empty()) {
 		// round-robin
 		loop = mEventLoops[mNext];
 		++mNext;
-		if (implicit_cast<size_t>(mNext) >= mEventLoops.size())
-		{
+		if (implicit_cast<size_t>(mNext) >= mEventLoops.size()) {
 		    mNext = 0;
 		}
 	}

@@ -6,24 +6,25 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_THREAD_SCHEDULEJOB_H_
-#define MOON_THREAD_SCHEDULEJOB_H_
+#ifndef MOON_OS_SCHEDULEJOB_H_
+#define MOON_OS_SCHEDULEJOB_H_
 
 #include <moon/Functor.h>
+#include <moon/noncopyable.h>
 #include <moon/Runnable.h>
-
-#include <boost/noncopyable.hpp>
 
 namespace moon {
 
-class ScheduleJob : boost::noncopyable
+class ScheduleJob : noncopyable
 {
 public:
-    static ScheduleJob* make(Runnable *runnable, bool autoRelease = true) {
+    static ScheduleJob* newJob(Runnable *runnable, bool autoRelease = true) 
+    {
 		return new ScheduleJob(runnable, autoRelease);
     }
 
-	static ScheduleJob* make(const Functor &cb) {
+	static ScheduleJob* newJob(const Functor &cb) 
+	{
 		return new ScheduleJob(cb);
     }
 

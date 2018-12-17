@@ -1,3 +1,11 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/net/ServerSocket.h>
 #include <moon/net/SocketOps.h>
 
@@ -26,13 +34,11 @@ ServerSocket::~ServerSocket()
 
 int ServerSocket::listen()
 {
-	if (mSocketFd < 0)
-	{
+	if (mSocketFd < 0) {
 		return -1;
 	}
 
-	if (init(mReuseAddr) != 0)
-	{
+	if (init(mReuseAddr) != 0) {
 		return -1;
 	}
 
@@ -45,8 +51,7 @@ int ServerSocket::accept(InetAddress* peerAddr)
 	bzero(&addr, sizeof addr);
 
 	int connfd = sockets::accept(mSocketFd, &addr);
-	if (connfd >= 0)
-	{
+	if (connfd >= 0) {
 	    peerAddr->setSockAddrInet(addr);
 	}
 
@@ -61,16 +66,13 @@ int ServerSocket::setReuseAddr(bool on)
 
 int ServerSocket::init(bool reuseAddr)
 {
-	if (reuseAddr)
-	{
-		if (this->setReuseAddr(reuseAddr) != 0)
-		{
+	if (reuseAddr) {
+		if (this->setReuseAddr(reuseAddr) != 0) {
 			return -1;
 		}
 	}
 
-	if (bind() != 0)
-	{
+	if (bind() != 0) {
 		return -1;
 	}
 

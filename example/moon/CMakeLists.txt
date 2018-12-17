@@ -1,0 +1,3 @@
+ADD_EXECUTABLE(moon_test_byte_buffer TestByteBuffer.cxx)
+TARGET_LINK_LIBRARIES(moon_test_byte_buffer moon)
+

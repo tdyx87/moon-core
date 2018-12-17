@@ -1,8 +1,16 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/net/TcpAcceptor.h>
+
+#include <moon/Logger.h>
 #include <moon/net/SocketOps.h>
-#include <moon/logger/Logger.h>
 #include <moon/os/EventLoop.h>
-#include <boost/bind.hpp>
 
 #include <errno.h>
 #include <string.h>
@@ -15,7 +23,7 @@ mServerSocket(listenAddr, true, reuseport), mAcceptChannel(mServerSocket.getFd()
 {
 	mEventLoop = loop;
 	mIsListenning = false;
-    mAcceptChannel.setReadCallback(boost::bind(&TcpAcceptor::handleRead, this));   
+    mAcceptChannel.setReadCallback(std::bind(&TcpAcceptor::handleRead, this));   
 }
 
 TcpAcceptor::~TcpAcceptor()
@@ -25,8 +33,7 @@ TcpAcceptor::~TcpAcceptor()
 
 int TcpAcceptor::listen()
 {
-	if (mServerSocket.listen() != 0)
-	{
+	if (mServerSocket.listen() != 0) {
 		LOGGER_FATAL("listen error:%s fd:%d", strerror(errno), mServerSocket.getFd());
 		return -1;
 	}
@@ -42,23 +49,16 @@ void TcpAcceptor::handleRead()
 	InetAddress peerAddr;
 
 	int connfd = mServerSocket.accept(&peerAddr);
-	if (connfd >= 0)
-	{
-		if (NULL != mNewConnectionCallback)
-		{
+	if (connfd >= 0) {
+		if (NULL != mNewConnectionCallback) {
 			mNewConnectionCallback(connfd, peerAddr);
-		}
-		else
-		{
+		} else {
 			LOGGER_TRACE("close connfd:%d", connfd);
 			sockets::close(connfd);
 		}
-	}
-	else
-	{
+	} else {
 		LOGGER_ERROR("accept failed, errno:%d error:%s", errno, strerror(errno));
-		if (EMFILE == errno)
-		{
+		if (EMFILE == errno) {
 			LOGGER_FATAL("the file descriptor has run out!");
 		}
 	}

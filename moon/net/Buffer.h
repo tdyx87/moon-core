@@ -52,36 +52,25 @@ public:
 	size_t prependableBytes()const {return mReadIndex;}
     
 	// 返回指向当前缓冲区第一个可读字节的指针
-	const char* peekFirst()const 
-	{
-		return peek(0);
-	}
+	//const char* peekFirst()const 
+	//{
+	//	return data(0);
+	//}
     
-	// 成功返回指向当前缓冲区第一个可读字节偏移offset位置的指针
-	// 失败返回NULL
-	const char* peek(size_t offset) const
+	const char* data() const
 	{
-		if (offset >= readableBytes())
-		{
-			return NULL;
-		}
-
-		return this->begin() + mReadIndex + offset;
+		return this->begin() + mReadIndex;
 	}
     
 	// 获取len字节的数据
 	// 如果len<readableBytes()获取len字节的数据,否则获取所有数据
 	void retrieve(size_t len)
 	{
-		if (len < this->readableBytes())
-		{
+		if (len < this->readableBytes()) {
 			mReadIndex += len;
-		}
-		else
-		{
+		} else {
 			this->retrieveAll();
 		}
-
 	}
 
     // 获取所有数据
@@ -102,7 +91,7 @@ public:
 	{
 		assert(len <= this->readableBytes());
 
-		std::string result(this->peekFirst(), len);
+		std::string result(this->data(), len);
 		this->retrieve(len);
 		return result;
 	}

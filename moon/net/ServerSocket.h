@@ -9,9 +9,8 @@
 #ifndef MOON_NET_SERVERSOCKET_H_
 #define MOON_NET_SERVERSOCKET_H_
 
+#include <moon/noncopyable.h>
 #include <moon/net/InetAddress.h>
-
-#include <boost/noncopyable.hpp>
 
 namespace moon
 {
@@ -23,7 +22,7 @@ class InetAddress;
 /**
 * 一个ServerSocket对象代表一个被监听的socket，不同于@Socket
 */
-class ServerSocket : boost::noncopyable
+class ServerSocket : noncopyable
 {
 public:
     ServerSocket(uint16_t port, bool nonblock = true, bool reuseAddr = true);

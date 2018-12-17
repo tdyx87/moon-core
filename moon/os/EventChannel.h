@@ -8,10 +8,9 @@
 #ifndef MOON_OS_EVENTCHANNEL_H_
 #define MOON_OS_EVENTCHANNEL_H_
 
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <moon/noncopyable.h>
+#include <functional>
+#include <memory>
 
 namespace moon
 {
@@ -51,21 +50,13 @@ class EventLoop;
   remove()方法和disableAll()都停止对对象所有事件的监控，disableAll()只停止监控对象的所有事件，
   并没有将事件对象移除循环队列，remove()方法会停止所有事件的监控，并且将事件对象从监控队列移除。
 */
-class EventChannel : boost::noncopyable
+class EventChannel : noncopyable
 {
 public:
     /**
       事件回调函数接口定义
     */
-    typedef boost::function<void()> EventCallback;
-
-	/**
-	  kNew表示对象处于新建状态。
-	  kAdded表示对象处于监控状态。
-	  kDeleted表示对象已停止监控。
-	*/
-	enum State{kNew, kAdded, kDeleted};
-
+    typedef std::function<void()> EventCallback;
 	
 	EventChannel(int fd, EventLoop* eventLoop);	
 	~EventChannel();	
@@ -99,13 +90,13 @@ public:
 	void setActiveEvents(int events) {mActiveEvents = events;}
     
 	// 设置对象的监控状态
-	void setState(State state) {mState = state;}
+	void setState(int state) {mState = state;}
 
 	// 获取对象的监控状态
-	State getState()const {return mState;}		
+	int getState()const {return mState;}		
 
 	EventLoop* ownerLoop() { return mEventLoop; }
-	void tie(const boost::shared_ptr<void>& tie);
+	void tie(const std::shared_ptr<void>& tie);
 
 private:
 	void update();
@@ -117,12 +108,12 @@ private:
 	int mFd;            // 描述符(并非一定是socket描述符)
     int mCurEvents;     // 希望监听事件类型
 	int mActiveEvents;  // 当前活动的事件
-	State mState;         // 通道当前状态
+	int mState;         // 通道当前状态
 	EventLoop* mEventLoop;
 
 	bool mEventHandling;
 	bool mAddedToLoop;
-	boost::weak_ptr<void> mTie;
+	std::weak_ptr<void> mTie;
 	bool mTied;
 
 	EventCallback mReadCallback;
@@ -130,8 +121,6 @@ private:
 	EventCallback mCloseCallback;
 	EventCallback mErrorCallback;
 };
-
-
 
 }  // ~moon
 

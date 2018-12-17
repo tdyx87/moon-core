@@ -1,21 +1,23 @@
-#include <moon/thread/SchedulerImpl.h>
-#include <moon/thread/ScheduleJob.h>
-#include <moon/thread/Worker.h>
+#include <moon/os/SchedulerImpl.h>
+
+#include <moon/Logger.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThread.h>
-#include <moon/logger/Logger.h>
+#include <moon/os/ScheduleJob.h>
+#include <moon/os/Worker.h>
+
 #include <moon/TypeCast.h>
 #include <moon/Timestamp.h>
-#include <moon/Integer.h>
+#include <moon/Number.h>
 
 #include <boost/bind.hpp>
 
 #include <assert.h>
 
-namespace moon {
+using namespace moon;
 
 static std::string getWorkName(int num) {
-	std::string sequence = Integer::toString(num);
+	std::string sequence = Number::intToString(num);
 	return "Worker-" + sequence;
 }
 
@@ -23,7 +25,6 @@ SchedulerPtr Scheduler::getDefaultScheduler(const std::string &name)
 {
     return SchedulerPtr(new SchedulerImpl(name));
 }
-
 
 SchedulerImpl::SchedulerImpl(const std::string &name) 
   :	mEventLoopThread(new EventLoopThread(name))
@@ -58,55 +59,55 @@ void SchedulerImpl::shutdown(bool waitForJobsDone)
 
 void SchedulerImpl::submit(const Functor &cb)
 {
-    ScheduleJob *job = ScheduleJob::make(cb);
+    ScheduleJob *job = ScheduleJob::newJob(cb);
 	submit(job);
 }
 
 void SchedulerImpl::submitAt(const Functor &cb, const Timestamp &when)
 {
-    ScheduleJob *job = ScheduleJob::make(cb);
+    ScheduleJob *job = ScheduleJob::newJob(cb);
 	submitAt(job, when);
 }
 
 void SchedulerImpl::submitAfter(const Functor &cb, long delayMills)
 {
-    ScheduleJob *job = ScheduleJob::make(cb);
+    ScheduleJob *job = ScheduleJob::newJob(cb);
 	submitAfter(job, delayMills);
 }
 
 
 void SchedulerImpl::submit(Runnable *runnable, bool autoRelease)
 {
-	ScheduleJob *job = ScheduleJob::make(runnable, autoRelease);
+	ScheduleJob *job = ScheduleJob::newJob(runnable, autoRelease);
     submit(job);
 }
 
 void SchedulerImpl::submitAt(Runnable *runnable, bool autoRelease, const Timestamp &when)
 {   
-	ScheduleJob *job = ScheduleJob::make(runnable, autoRelease);
+	ScheduleJob *job = ScheduleJob::newJob(runnable, autoRelease);
 	submitAt(job, when);
 }
 
 void SchedulerImpl::submitAfter(Runnable *runnable, bool autoRelease, long delayMills)
 {
-	ScheduleJob *job = ScheduleJob::make(runnable, autoRelease);
+	ScheduleJob *job = ScheduleJob::newJob(runnable, autoRelease);
 	submitAfter(job, delayMills);
 }
 
 void SchedulerImpl::submit(ScheduleJob *job)
 {
-	mEventLoop->runInLoop(boost::bind(&SchedulerImpl::onDispatchJob, this, job));
+	mEventLoop->runInLoop(std::bind(&SchedulerImpl::onDispatchJob, this, job));
 }
 
 void SchedulerImpl::submitAt(ScheduleJob *job, const Timestamp &when)
 {
-	mEventLoop->runInLoop(boost::bind(&SchedulerImpl::onDispatchPendingJob, this, job, when));
+	mEventLoop->runInLoop(std::bind(&SchedulerImpl::onDispatchPendingJob, this, job, when));
 }
 
 void SchedulerImpl::submitAfter(ScheduleJob *job, long delayMills)
 {   
 	Timestamp when = Timestamp::addMsecs(Timestamp::now(), delayMills);	
-	mEventLoop->runInLoop(boost::bind(&SchedulerImpl::onDispatchPendingJob, this, job, when));
+	mEventLoop->runInLoop(std::bind(&SchedulerImpl::onDispatchPendingJob, this, job, when));
 }
 
 void SchedulerImpl::onDispatchJob(ScheduleJob *job)
@@ -126,7 +127,7 @@ void SchedulerImpl::onDispatchJob(ScheduleJob *job)
 void SchedulerImpl::onDispatchPendingJob(ScheduleJob *job, const Timestamp &when)
 {
     mPendingJobs.insert(std::make_pair(job, job));
-	mEventLoop->runAt(boost::bind(&SchedulerImpl::onHandlePendingJob, this, job), when);
+	mEventLoop->runAt(std::bind(&SchedulerImpl::onHandlePendingJob, this, job), when);
 }
 
 void SchedulerImpl::onHandlePendingJob(ScheduleJob *job)
@@ -146,7 +147,7 @@ void SchedulerImpl::onHandlePendingJob(ScheduleJob *job)
 
 void SchedulerImpl::onJobFinished(ScheduleJob *job)
 {
-    mEventLoop->runInLoop(boost::bind(&SchedulerImpl::onJobFinishedHandleInLoop, this, job));
+    mEventLoop->runInLoop(std::bind(&SchedulerImpl::onJobFinishedHandleInLoop, this, job));
 }
 
 void SchedulerImpl::onJobFinishedHandleInLoop(ScheduleJob *job)
@@ -173,7 +174,7 @@ void SchedulerImpl::onShutdownInLoop(bool waitForJobsDone)
 	    mPendingJobs.clear();
 	}
 	
-	for (int i = 0; i < mWorkers.size(); ++i) {
+	for (size_t i = 0; i < mWorkers.size(); ++i) {
 		LOGGER_DEBUG("Worker[%d] shutdown...", i);
 		mWorkers[i]->shutdown();
 	}
@@ -192,9 +193,3 @@ SchedulerImpl::WorkerPtr SchedulerImpl::getNextWorker()
 
 	return worker;
 }
-
-
-
-}  // ~moon
-
-

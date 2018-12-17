@@ -8,24 +8,25 @@
 #ifndef MOON_OS_EVENTLOOPTHREAD_H_
 #define MOON_OS_EVENTLOOPTHREAD_H_
 
+#include <moon/AtomicInteger.h>
+#include <moon/noncopyable.h>
 #include <moon/thread/CountDownLatch.h>
 #include <moon/thread/MutexLock.h>
 #include <moon/thread/Thread.h>
-#include <moon/AtomicInteger.h>
-
-#include <boost/noncopyable.hpp>
 
 namespace moon
 {
+
 class EventLoop;
 
-class EventLoopThread : public boost::noncopyable
+class EventLoopThread : public noncopyable
 {
-	typedef boost::function<void(EventLoop*)> ThreadInitCallback;
+	typedef std::function<void(EventLoop*)> ThreadInitCallback;
 public:
 	EventLoopThread(const std::string &name, const ThreadInitCallback& cb = ThreadInitCallback());
     ~EventLoopThread();
     
+    EventLoop* eventLoop() {return mEventLoop;}
 	EventLoop* startLoop();
 
 	void quit();
@@ -47,8 +48,6 @@ private:
 	ThreadInitCallback mThreadInitCallback;
 	
 };
-
-
 
 
 }  // ~moon

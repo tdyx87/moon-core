@@ -1,8 +1,15 @@
-#include <moon/os/Timer.h>
-#include <moon/os/EventLoop.h>
-#include <moon/logger/Logger.h>
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
 
-#include <boost/bind.hpp>
+  Author: Mugui Zhou
+*/
+
+#include <moon/os/Timer.h>
+
+#include <moon/Logger.h>
+#include <moon/os/EventLoop.h>
 
 #include <time.h>
 #include <sys/timerfd.h>
@@ -11,13 +18,12 @@
 #include <assert.h>
 #include <stdint.h>
 
-namespace moon {
+using namespace moon;
 
 static int createTimerfd()
 {
 	int timerfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
-	if (timerfd < 0) 
-	{
+	if (timerfd < 0) {
 		LOGGER_FATAL("Failed int timerfd_create");
 	}
 
@@ -30,8 +36,7 @@ static void readTimerfd(int timefd, const Timestamp &now)
 	ssize_t n = read(timefd, &howmany, sizeof(howmany));
 	LOGGER_TRACE("readTimerfd howmany[%lu] at %s", howmany, now.toMicroFormattedString().c_str());
 
-	if (n != sizeof(howmany))
-    {
+	if (n != sizeof(howmany)) {
 		LOGGER_ERROR("readTimerfd reads %lu bytes instead of 8\n", howmany);
     }
 }
@@ -39,8 +44,7 @@ static void readTimerfd(int timefd, const Timestamp &now)
 static timespec howMuchTimeFromNow(const Timestamp &when)
 {
 	int64_t microSeconds = when.usecs() - Timestamp::now().usecs();
-	if (microSeconds < 100)
-	{
+	if (microSeconds < 100) {
 		microSeconds = 100;
 	}
 
@@ -57,8 +61,7 @@ static void resetTimerfd(int timerfd, const Timestamp &expiration)
 
 	newValue.it_value = howMuchTimeFromNow(expiration);
 	int ret = ::timerfd_settime(timerfd, 0, &newValue, NULL);
-    if (ret)
-    {
+    if (ret) {
         LOGGER_ERROR("timerfd_settime()");
     }
 }
@@ -69,7 +72,7 @@ Timer::Timer(EventLoop* loop)
 	: mEventLoop(loop), mTimerfd(createTimerfd()), mEventChannel(mTimerfd, loop)
 {
 	mCallingExpiredTimerTasks = false;
-	mEventChannel.setReadCallback(boost::bind(&Timer::handleRead, this));
+	mEventChannel.setReadCallback(std::bind(&Timer::handleRead, this));
 	mEventChannel.enableReading();
 }
 
@@ -89,7 +92,7 @@ TimerTaskId Timer::add(const TimerCallback& cb, const Timestamp &when, long peri
 	TimerTask* timerTask = new TimerTask(cb, when, periodMsec, count);
 	
 	timerTask->setSequence(sequence);
-	mEventLoop->runInLoop(boost::bind(&Timer::addTimerInLoop, this, timerTask));
+	mEventLoop->runInLoop(std::bind(&Timer::addTimerInLoop, this, timerTask));
 	
 	return TimerTaskId(timerTask, sequence);
 }
@@ -97,7 +100,7 @@ TimerTaskId Timer::add(const TimerCallback& cb, const Timestamp &when, long peri
 void Timer::cancel(const TimerTaskId &timerTaskId)
 {
 	assert(mEventLoop != NULL);
-	mEventLoop->runInLoop(boost::bind(&Timer::cancelTimerInLoop, this, timerTaskId));
+	mEventLoop->runInLoop(std::bind(&Timer::cancelTimerInLoop, this, timerTaskId));
 }
 
 void Timer::addTimerInLoop(TimerTask *timerTask)
@@ -106,8 +109,7 @@ void Timer::addTimerInLoop(TimerTask *timerTask)
 
 	bool earliestChanged = add(TimerTaskPtr(timerTask));
 	
-	if (earliestChanged)
-	{
+	if (earliestChanged) {
 	    resetTimerfd(mTimerfd, timerTask->expiration());
 	}	
 }
@@ -116,12 +118,9 @@ void Timer::cancelTimerInLoop(const TimerTaskId &timerTaskId)
 {
 	mEventLoop->assertInLoopThread();
     TimerTaskList::iterator pos = find(timerTaskId.getTimerTask()->expiration().usecs(), timerTaskId.getTimerTask());
-    if (mTimerTasks.end() != pos)
-    {
+    if (mTimerTasks.end() != pos) {
 		mTimerTasks.erase(pos);
-    }
-	else if (mCallingExpiredTimerTasks)
-	{
+    } else if (mCallingExpiredTimerTasks) {
 		mCancelingTimerTasks.insert(timerTaskId.getTimerTask());
 	}	
 }
@@ -135,12 +134,10 @@ void Timer::handleRead()
 	std::vector<TimerTaskPtr> expiredTimerTasks;	
 	const size_t count = getExpired(now, expiredTimerTasks);
 	assert(count == expiredTimerTasks.size());
-	//LOGGER_TRACE("TimerTask total size[%lu] expired size[%lu] timers has expired", mTimerTasks.size(), count);
 
 	mCallingExpiredTimerTasks = true;
 	mCancelingTimerTasks.clear();
-	for (std::vector<TimerTaskPtr>::iterator it = expiredTimerTasks.begin(); it != expiredTimerTasks.end(); ++it)
-	{
+	for (std::vector<TimerTaskPtr>::iterator it = expiredTimerTasks.begin(); it != expiredTimerTasks.end(); ++it) {
 		assert(it->get());		
 		it->get()->run();
 	}
@@ -154,8 +151,7 @@ size_t Timer::getExpired(const Timestamp &now, std::vector<TimerTaskPtr> &expire
 {
 	size_t count = 0;
 	TimerTaskList::iterator last = mTimerTasks.upper_bound(now.usecs());
-	for (TimerTaskList::iterator it = mTimerTasks.begin() ; it != last; ++it)
-    {
+	for (TimerTaskList::iterator it = mTimerTasks.begin() ; it != last; ++it) {
 		expiredTimerTasks.push_back(it->second);		
 		++count;
     }
@@ -171,8 +167,7 @@ bool Timer::add(const TimerTaskPtr &timerTask)
 	const long whenUsec = timerTask->expiration().usecs();
 	
 	TimerTaskList::iterator it = mTimerTasks.begin();
-    if (it == mTimerTasks.end() || whenUsec < it->first)
-    {
+    if (it == mTimerTasks.end() || whenUsec < it->first) {
         earliestChanged = true;
     }
 
@@ -185,18 +180,15 @@ bool Timer::add(const TimerTaskPtr &timerTask)
 Timer::TimerTaskList::iterator Timer::find(long usec, const TimerTask *timerTask)
 {
 	TimerTaskList::iterator pos = mTimerTasks.find(usec);
-	if (pos == mTimerTasks.end())
-	{
+	if (pos == mTimerTasks.end()) {
 		return pos;
 	}
 
 	const size_t count = mTimerTasks.count(usec);
 	assert(count > 0);
 
-	for (size_t i = 0; i < count; ++i)
-	{
-		if (pos->second.get() == timerTask)
-		{
+	for (size_t i = 0; i < count; ++i) {
+		if (pos->second.get() == timerTask) {
 			return pos;
 		}
 		++pos;
@@ -208,25 +200,20 @@ Timer::TimerTaskList::iterator Timer::find(long usec, const TimerTask *timerTask
 
 void Timer::reset(const std::vector<TimerTaskPtr> &expiredTimerTasks, const Timestamp &now)
 {
-	for (std::vector<TimerTaskPtr>::const_iterator it = expiredTimerTasks.begin(); it != expiredTimerTasks.end(); ++it)
-	{
-		if ( (it->get()->repeat()) && (mCancelingTimerTasks.find(it->get()) == mCancelingTimerTasks.end()) )
-		{
+	for (std::vector<TimerTaskPtr>::const_iterator it = expiredTimerTasks.begin(); it != expiredTimerTasks.end(); ++it) {
+		if ( (it->get()->repeat()) && (mCancelingTimerTasks.find(it->get()) == mCancelingTimerTasks.end()) ) {
+
 			it->get()->reset(now);
 		    add(*it);
 		}
 	}
 
-	if (!mTimerTasks.empty())
-	{
+	if (!mTimerTasks.empty()) {
 		long nextExpireUsec = mTimerTasks.begin()->first;
-		if (nextExpireUsec > 0)
-		{
+		if (nextExpireUsec > 0) {
 			resetTimerfd(mTimerfd, Timestamp(nextExpireUsec));
 		}
-   }
+    }
 }
 
-
-}  // ~moon
 

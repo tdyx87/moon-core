@@ -6,31 +6,32 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_TIMERTASKID_H_
-#define MOON_OS_TIMERTASKID_H_
+#ifndef MOON_NET_TIMERTASKID_H_
+#define MOON_NET_TIMERTASKID_H_
 
 #include <moon/os/TimerTask.h>
 
 namespace moon 
 {
+
 class TimerTaskId
 {
 public:
-	TimerTaskId() {}
-	TimerTaskId(TimerTask *timerTask, int64_t sequence)
+	  TimerTaskId() {}
+	  TimerTaskId(TimerTask *timerTask, int64_t sequence)
         : mTimerTask(timerTask), mSequence(sequence)
     { 
-	}
+	  }
 
-	int64_t id() const {return mSequence;}	
+	  int64_t id() const {return mSequence;}	
 private:
     TimerTask* getTimerTask() const {return mTimerTask;}
 private:
     friend class Timer;
-	TimerTask *mTimerTask;
-	int64_t mSequence;
+	  TimerTask *mTimerTask;
+	  int64_t mSequence;
 };
 
-}
+}  //~ moon
 
 #endif

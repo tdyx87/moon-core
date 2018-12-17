@@ -1,9 +1,7 @@
-#ifndef MOON_THREAD_SCHEDULERIMPL_H_
-#define MOON_THREAD_SCHEDULERIMPL_H_
+#ifndef MOON_OS_SCHEDULERIMPL_H_
+#define MOON_OS_SCHEDULERIMPL_H_
 
-#include <moon/thread/Scheduler.h>
-
-#include <boost/shared_ptr.hpp>
+#include <moon/os/Scheduler.h>
 
 #include <map>
 #include <vector>
@@ -16,7 +14,7 @@ class Worker;
 
 class SchedulerImpl : public Scheduler
 {
-	typedef boost::shared_ptr<Worker> WorkerPtr;
+	typedef std::shared_ptr<Worker> WorkerPtr;
 public:
 	SchedulerImpl(const std::string &name);
 	virtual ~SchedulerImpl();
@@ -52,10 +50,10 @@ private:
 	int mNext;
 
 	EventLoop *mEventLoop;
-	boost::shared_ptr<EventLoopThread> mEventLoopThread;
+	std::shared_ptr<EventLoopThread> mEventLoopThread;
 	
 	std::map<ScheduleJob*, ScheduleJob*> mJobs;
-	std::map< ScheduleJob*, ScheduleJob*> mPendingJobs;
+	std::map<ScheduleJob*, ScheduleJob*> mPendingJobs;
 
 	long mCompletedJobs;
 };

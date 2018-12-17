@@ -6,14 +6,16 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_TIMERCALLBACK_H_
-#define MOON_OS_TIMERCALLBACK_H_
+#ifndef MOON_NET_TIMERCALLBACK_H_
+#define MOON_NET_TIMERCALLBACK_H_
 
-#include <boost/function.hpp>
+#include <functional>
 
-namespace moon {
-    typedef boost::function<void()> TimerCallback;
-}
+namespace moon 
+{
+    typedef std::function<void()> TimerCallback;
+
+}  //~ moon
 
 #endif
 

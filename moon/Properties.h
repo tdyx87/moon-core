@@ -18,15 +18,15 @@ namespace moon
 class Properties
 {
 public:
-	int load(const std::string& fileName);
+	bool load(const std::string& fileName);
 
 	// 返回true表示key对应的键存在
 	bool containsKey(const std::string& key)const {return mProperties.count(key) == 1;}
 
 	std::string getProperty(const std::string& name, const std::string defaultValue = "") const;
-	int getInt(const std::string& name, int defaultValue) const;
-	int getLong(const std::string& name, long defaultValue) const;
-	int getDouble(const std::string& name, double defaultValue) const;
+	int getInt(const std::string& name, int defaultValue = 0) const;
+	long getLong(const std::string& name, long defaultValue = 0L) const;
+	double getDouble(const std::string& name, double defaultValue = 0.0) const;
 private:
 	void parseLine(const std::string &line);
 private:

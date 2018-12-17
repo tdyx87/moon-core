@@ -54,24 +54,24 @@ public:
 	static inline bool isHex(int c){return ::isxdigit(c) != 0 ? true : false;}
  
     // Returns lowercase equivalent to c, if such value exists, or returns c unchanged.
-	static inline unsigned char toLower(int c){return static_cast<unsigned char>(::tolower(c));}
+	static inline int toLower(int c){return ::tolower(c);}
 
 	// Returns uppercase equivalent to c, if such value exists, or returns c unchanged.
-	static inline unsigned char toUpper(int c){return static_cast<unsigned char>(::toupper(c));}
+	static inline int toUpper(int c){return ::toupper(c);}
 
 	/**
 	  如果字符c是0~9, a~f, A~F之间的字符，返回'c'字符所表示的十六进制值。
 	  例如：toHex('0')=0x00, toHex('F')=0x0F; toHex('Z')='Z'
 	  否则原样返回c
 	*/
-	static unsigned char toHex(unsigned char c);
+	static int toHex(int c);
 	
 	/**
 	  如果c的值介于[0, 0x0F]之间,返回字符c对应的字符值。
 	  例如：toChar(0x00)='0', toChar(0x0F)='F'.
 	  否则原样返回c
 	*/
-	static unsigned char toChar(unsigned char c);
+	static int toChar(int c);
 public:
 	static const char MAX_VALUE;  // char能表示的最大值
 	static const char MIN_VALUE;  // char能表示的最小值

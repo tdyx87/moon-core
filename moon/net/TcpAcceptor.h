@@ -9,11 +9,11 @@
 #ifndef MOON_NET_TCPACCEPTOR_H_
 #define MOON_NET_TCPACCEPTOR_H_
 
+#include <moon/noncopyable.h>
 #include <moon/net/ServerSocket.h>
 #include <moon/os/EventChannel.h>
 
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
+#include <functional>
 
 namespace moon
 {
@@ -21,13 +21,12 @@ class EventLoop;
 
 namespace net
 {
-
 class InetAddress;
 
-class TcpAcceptor : boost::noncopyable
+class TcpAcceptor : noncopyable
 {
 public:
-	typedef boost::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
+	typedef std::function<void (int sockfd, const InetAddress&)> NewConnectionCallback;
 
 	TcpAcceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
     ~TcpAcceptor();

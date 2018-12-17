@@ -5,6 +5,7 @@
 
   Author: Mugui Zhou
 */
+
 #ifndef MOON_STATUS_H_
 #define MOON_STATUS_H_
 
@@ -42,7 +43,7 @@ public:
 
 	  static Status posixError(int code, const Slice& msg=Slice());
 
-	  operator bool() const {NULL == mState;}
+	  operator bool() const {return NULL == mState;}
 	  bool isOk() const {return NULL == mState;}
 
 	  int errorCode() const;

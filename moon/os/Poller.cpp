@@ -1,5 +1,14 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/os/Poller.h>
 #include <moon/os/EventChannel.h>
+#include <moon/os/EpollPoller.h>
 
 #include <stdio.h>
 #include <poll.h>
@@ -23,4 +32,9 @@ bool Poller::hasEventChannel(EventChannel* channel) const
 
 	EventChannelMap::const_iterator it = mEventChannels.find(channel->getFd());
     return it != mEventChannels.end() && it->second == channel;
+}
+
+Poller* Poller::newDefaultPoller(EventLoop* loop)
+{
+    return new EpollPoller(loop);
 }

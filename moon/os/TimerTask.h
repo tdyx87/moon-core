@@ -4,23 +4,25 @@
   that can be found in the License file.
 
   Author: Mugui Zhou
+
+  一个TimerTask对象表示一个定时任务。
+  每一个TimerTask对象有两个重要属性：
+  1 执行时间点：通过TimerTask::expiration()方法获取。
+  2 任务执行间隔：通过TimerTask::repeat()判断该任务是否需要循环执行。
+
 */
 
-#ifndef MOON_OS_TIMERTASK_H_
-#define MOON_OS_TIMERTASK_H_
+#ifndef MOON_NET_TIMERTASK_H_
+#define MOON_NET_TIMERTASK_H_
 
 #include <moon/Timestamp.h>
 #include <moon/os/TimerCallback.h>
 
 #include <stdint.h>
 
-namespace moon {
-/**
-  一个TimerTask对象表示一个定时任务。
-  每一个TimerTask对象有两个重要属性：
-  1 执行时间点：通过TimerTask::expiration()方法获取。
-  2 任务执行间隔：通过TimerTask::repeat()判断该任务是否需要循环执行。
-*/
+namespace moon 
+{
+
 class TimerTask
 {
 public:
@@ -32,8 +34,7 @@ public:
 
 	void run()  
     {
-		if (mCallback)
-		{
+		if (mCallback) {
 		    ++mExecutions;
 			mCallback();
 		}
@@ -59,6 +60,6 @@ private:
 	int mExecutions;
 };
 
-}
+}  //~ moon
 
 #endif

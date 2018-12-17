@@ -9,11 +9,8 @@
 #ifndef MOON_NET_TCPSERVER_H_
 #define MOON_NET_TCPSERVER_H_
 
-#include <moon/net/Callbacks.h>
-
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <moon/noncopyable.h>
+#include <moon/net/NetDefine.h>
 
 #include <string>
 #include <map>
@@ -29,9 +26,9 @@ class InetAddress;
 class TcpAcceptor;
 class TcpConnection;
 
-class TcpServer : boost::noncopyable
+class TcpServer : noncopyable
 {
-	typedef boost::function<void(EventLoop*)> ThreadInitCallback;
+	typedef std::function<void(EventLoop*)> ThreadInitCallback;
     typedef std::map<std::string, TcpConnectionPtr> TcpConnectionMap;
 public:
 	TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::string& name);
@@ -50,7 +47,7 @@ public:
 	void setMessageCallback(const MessageCallback& cb){ mMessageCallback = cb; }
     
 	// for test
-	int connecionSize()const {return mTcpConnection.size();}
+	size_t connecionSize()const {return mTcpConnection.size();}
 private:
 	/** 
     * Called when a connection is completed, this call is not thread safe, but in loop
@@ -76,8 +73,8 @@ private:
     MessageCallback mMessageCallback;
 	ThreadInitCallback mThreadInitCallback;
     
-	boost::shared_ptr<EventLoopThreadPool> mThreadPool;
-	boost::scoped_ptr<TcpAcceptor> mTcpAcceptor; 
+	std::shared_ptr<EventLoopThreadPool> mThreadPool;
+	std::unique_ptr<TcpAcceptor> mTcpAcceptor; 
 	TcpConnectionMap mTcpConnection;
 };
 

@@ -1,15 +1,24 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThread.h>
 
-#include <boost/bind.hpp>
+#include <assert.h>
 #include <stdio.h>
+#include <functional>
 
 using namespace moon;
 
 AtomicInt64 EventLoopThread::sNumCreated(0); 
 
 EventLoopThread::EventLoopThread(const std::string &name, const ThreadInitCallback& cb)
-	: mThread(boost::bind(&EventLoopThread::threadFunc, this), "EventLoopThread"),
+	: mThread(std::bind(&EventLoopThread::threadFunc, this), "EventLoopThread"),
 	  mMutex(),
       mLatch(1),
 	  mThreadInitCallback(cb)
@@ -64,8 +73,7 @@ void EventLoopThread::threadFunc()
 {
 	EventLoop loop;
 
-	if (mThreadInitCallback)
-	{
+	if (mThreadInitCallback) {
 	    mThreadInitCallback(&loop);
 	}
 	

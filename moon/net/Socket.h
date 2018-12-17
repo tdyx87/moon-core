@@ -9,7 +9,7 @@
 #ifndef MOON_NET_SOCKET_H_
 #define MOON_NET_SOCKET_H_
 
-#include <boost/noncopyable.hpp>
+#include <moon/noncopyable.h>
 
 namespace moon
 {
@@ -19,7 +19,7 @@ namespace net
 /**
 * Socket类对象表示一个客户端连接的Tcp连接对象
 */
-class Socket : boost::noncopyable
+class Socket : noncopyable
 {
 public:
     explicit Socket(int fd) : mFd(fd) {}

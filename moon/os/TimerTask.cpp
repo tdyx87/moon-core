@@ -1,6 +1,14 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/os/TimerTask.h>
 
-namespace moon {
+using namespace moon;
 
 TimerTask::TimerTask(const TimerCallback& cb, Timestamp when, int count)
         : mCallback(cb), mExpiration(when), mCount(count), mPeriod(0)
@@ -27,5 +35,4 @@ void TimerTask::reset(const Timestamp &now)
 }
 
 
-} // ~moon
 

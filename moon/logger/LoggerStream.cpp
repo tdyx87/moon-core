@@ -67,7 +67,6 @@ template<typename T> void LoggerStream::formatInteger(T v)
 {
   if (mBuffer->available() >= kMaxNumericSize)
   {
-      char buffer[32] = {0};
       size_t len = convert(mBuffer->current(), v);
       mBuffer->add(len);
   }

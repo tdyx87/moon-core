@@ -24,7 +24,7 @@ public:
 
 	Runnable* runnable() const {return mRunnable;}
 	
-	bool autoRelease() const {}
+	bool autoRelease() const {return mAutoRelease;}
 private:
 	Runnable *mRunnable;
 	bool mAutoRelease;

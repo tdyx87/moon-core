@@ -1,7 +1,7 @@
 #include <moon/logger/Logger.h>
 #include <moon/logger/LoggingPolicy.h>
 #include <moon/thread/CurrentThread.h>
-#include <moon/Integer.h>
+#include <moon/Number.h>
 #include <moon/Timestamp.h>
 
 #include <stdarg.h>

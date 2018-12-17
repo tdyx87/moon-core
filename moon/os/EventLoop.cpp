@@ -1,25 +1,31 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
+#include <moon/Logger.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventChannel.h>
-#include <moon/os/EpollPoller.h>
+#include <moon/os/Poller.h>
 #include <moon/os/Timer.h>
-#include <moon/logger/Logger.h>
 
-#include <boost/bind.hpp>
 #include <sys/eventfd.h>
 #include <assert.h>
 
 namespace moon
 {
 
-static const int iPollTimeMs = 60 * 1000;
+static const int kPollTimeMs = 60 * 1000;
 
 __thread EventLoop* t_loopInThisThread = NULL;
 
 static int createEventfd()
 {
 	int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-	if (evtfd < 0)
-	{
+	if (evtfd < 0) {
 	    LOGGER_FATAL("Failed in eventfd");
 	    abort();
 	}
@@ -28,17 +34,14 @@ static int createEventfd()
 
 EventLoop::EventLoop() 
 	: mThreadId(CurrentThread::tid()),
-	  mPoller(new EpollPoller(this)),
+	  mPoller(Poller::newDefaultPoller(this)),
 	  mTimer(new Timer(this)),
 	  mWakeupFd(createEventfd()),
 	  mWakeupChannel(new EventChannel(mWakeupFd, this))
 {
-	if (t_loopInThisThread != NULL)
-	{
+	if (t_loopInThisThread != NULL) {
 		LOGGER_FATAL("Another EventLoop exists in this thread");
-	}
-	else
-	{		
+	} else {		
 		t_loopInThisThread = this;
 		mIsQuit = false;
 	    mIsLooping = false;
@@ -46,7 +49,7 @@ EventLoop::EventLoop()
 		mIsCallingPendingFunctors = false;
 		mCurrentActiveChannel = NULL;
 
-		mWakeupChannel->setReadCallback(boost::bind(&EventLoop::handleRead, this));
+		mWakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
 		mWakeupChannel->enableReading();
 	}	
 }
@@ -74,26 +77,21 @@ void EventLoop::loop()
     mIsQuit = false;
 	int iErrorNum = 0;
 
-	while (!mIsQuit)
-	{
+	while (!mIsQuit) {
 		mEventChannelList.clear();
         
-		int num = mPoller->poll(iPollTimeMs, &mEventChannelList);
-		if (num == 0)
-		{
+		int num = mPoller->poll(kPollTimeMs, &mEventChannelList);
+		if (num == 0) {
 			iErrorNum = 0;
 			continue;
-		}
-		else if (num < 0)
-		{
+		} else if (num < 0) {
 			++iErrorNum;
 			assert(iErrorNum < 10);			
 		}
 		iErrorNum = 0;
         
 		mIsEventHandling = true;
-		for (EventChannelList::iterator it = mEventChannelList.begin(); it != mEventChannelList.end(); ++it)
-		{
+		for (EventChannelList::iterator it = mEventChannelList.begin(); it != mEventChannelList.end(); ++it) {
 			mCurrentActiveChannel = *it;
 			mCurrentActiveChannel->handleEvent();
 		}
@@ -101,6 +99,8 @@ void EventLoop::loop()
 		mCurrentActiveChannel = NULL;
 		mIsEventHandling = false;
 		this->doPendingFunctors();
+
+		this->mDelayedDeletes.clear();
 	}	
 
 	LOGGER_TRACE("EventLoop stop looping");
@@ -132,20 +132,16 @@ void EventLoop::quit()
 		return ;
     }
 	mIsQuit = true;
-	if (!isInLoopThread())
-	{
+	if (!isInLoopThread()) {
 	    wakeup();
 	}
 }
 
 void EventLoop::runInLoop(const Functor& cb)
 {
-	if (this->isInLoopThread())
-	{
+	if (this->isInLoopThread()) {
 	    cb();
-	}
-	else
-	{
+	} else {
 	    this->queueInLoop(cb);
 	}
 }
@@ -157,8 +153,7 @@ void EventLoop::queueInLoop(const Functor& cb)
 	    mPendingFunctors.push_back(cb);
 	}
 
-	if ( (!this->isInLoopThread()) || mIsCallingPendingFunctors)
-	{
+	if ( (!this->isInLoopThread()) || mIsCallingPendingFunctors) {
 	    this->wakeup();
 	}
 }
@@ -189,8 +184,7 @@ void EventLoop::wakeup()
 {
 	uint64_t one = 1;
 	ssize_t n = ::write(mWakeupFd, &one, sizeof one);
-	if (n != sizeof one)
-	{
+	if (n != sizeof one) {
 		LOGGER_ERROR("EventLoop::wakeup() writes %ld bytes instead of 8", n);
 	}
 }
@@ -199,9 +193,7 @@ void EventLoop::handleRead()
 {
 	uint64_t one = 1;
 	ssize_t n = ::read(mWakeupFd, &one, sizeof one);
-	//LOGGER_TRACE("handleRead one:") << one;
-	if (n != sizeof one)
-	{
+	if (n != sizeof one) {
 		LOGGER_ERROR("EventLoop::handleRead() reads %ld bytes instead of 8", n);
 	}
 }
@@ -216,13 +208,11 @@ void EventLoop::doPendingFunctors()
 	    functors.swap(mPendingFunctors);
 	}
 
-	for (size_t i = 0; i < functors.size(); ++i)
-	{
+	for (size_t i = 0; i < functors.size(); ++i) {
 	    functors[i]();
 	}
 	mIsCallingPendingFunctors = false;
 }
-
 
 
 }  // ~moon

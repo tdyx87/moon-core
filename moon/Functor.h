@@ -9,11 +9,12 @@
 #ifndef MOON_FACTOR_H_
 #define MOON_FACTOR_H_
 
-#include <boost/function.hpp>
+#include <functional>
 
-namespace moon {
+namespace moon 
+{
 
-typedef boost::function<void()> Functor;
+typedef std::function<void()> Functor;
 
 }
 

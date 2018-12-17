@@ -9,11 +9,6 @@
 #ifndef MOON_OS_EPOLLPOLLER_H_
 #define MOON_OS_EPOLLPOLLER_H_
 
-/**
-* 文件名: EpollPoller.h
-* 文件描述: 
-*/
-
 #include <moon/os/Poller.h>
 
 #include <sys/epoll.h>
@@ -21,9 +16,6 @@
 namespace moon
 {
 
-/**
-  继承自@Poller类，采用epoll作为事件监控的底层实现。
-*/
 class EpollPoller : public Poller
 {
 public:	
@@ -47,7 +39,6 @@ private:
     EventList mEvents;    
 	
 };
-
 
 }  // ~moon
 #endif  // ~

@@ -14,22 +14,21 @@
 * 文件描述: 封装线程操作
 */
 
-#include <moon/Thread/ThreadState.h>
 #include <moon/AtomicInteger.h>
-
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
+#include <moon/noncopyable.h>
+#include <moon/Thread/ThreadState.h>
 
 #include <pthread.h>
 #include <stddef.h>
+#include <functional>
 #include <string>
 
 namespace moon
 {
 
-class Thread : boost::noncopyable
+class Thread : noncopyable
 {
-	typedef boost::function<void ()> ThreadFunc;
+	typedef std::function<void ()> ThreadFunc;
 public:    
 	/** 构造函数 */
 	explicit Thread(const ThreadFunc& func, const std::string& threadName = std::string() );

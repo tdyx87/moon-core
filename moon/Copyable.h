@@ -15,7 +15,7 @@ namespace moon
 /**
  * 值语义标志。继承该类的对象具有值语义，支持复制、拷贝操作
  */
-class Copyable
+class copyable
 {
 };
 

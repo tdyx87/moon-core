@@ -1,14 +1,22 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
+#include <moon/Logger.h>
 #include <moon/os/EventChannel.h>
 #include <moon/os/EventLoop.h>
-#include <moon/logger/Logger.h>
 
 #include <assert.h>
 #include <poll.h>
 #include <stdio.h>
 #include <unistd.h>
 
-using namespace moon;
-
+namespace moon
+{
 const int EventChannel::kEventNone = 0;
 const int EventChannel::kEventRead = POLLIN | POLLPRI;
 const int EventChannel::kEventWrite = POLLOUT;
@@ -17,7 +25,7 @@ EventChannel::EventChannel(int fd, EventLoop* pEventLoop) : mFd(fd)
 {    
 	mCurEvents = kEventNone;
 	mActiveEvents = kEventNone;
-	mState = kNew;
+	mState = -1;
 
 	mEventLoop = pEventLoop;
     mEventHandling = false;
@@ -32,7 +40,7 @@ EventChannel::~EventChannel()
 
 void EventChannel::remove()
 {
-	if (kAdded == mState)
+	if (!isNoneEvent())
 	{
 		disableAll();
 	}
@@ -41,49 +49,39 @@ void EventChannel::remove()
 
 void EventChannel::handleEvent()
 {
-	boost::shared_ptr<void> guard;
-	if (mTied)
-	{
+	std::shared_ptr<void> guard;
+	if (mTied) {
 	    guard = mTie.lock();
-		if (!guard)
-		{
+		if (!guard) {
 			return ;
 		}
 	}
 
 	mEventHandling = true;
 
-	if ( (mActiveEvents & POLLHUP) && !(mActiveEvents & POLLIN) )
-	{
+	if ( (mActiveEvents & POLLHUP) && !(mActiveEvents & POLLIN) ) {
 	    LOGGER_WARN("EventChannel::handleEvent() POLLHUP");
-		if (mCloseCallback != NULL)
-		{	
+		if (mCloseCallback != NULL) {	
 			mCloseCallback();
 		}
 	}
 
-	if (mActiveEvents & (POLLERR | POLLNVAL))
-	{
-	    if (mErrorCallback) 
-		{
+	if (mActiveEvents & (POLLERR | POLLNVAL)) {
+	    if (mErrorCallback) {
 			mErrorCallback();
 		}
 	}
 
 	// 读事件处理
-	if (mActiveEvents & (POLLIN | POLLPRI | POLLRDHUP) )
-	{
-		if (mReadCallback != NULL)
-		{
+	if (mActiveEvents & (POLLIN | POLLPRI | POLLRDHUP) ) {
+		if (mReadCallback != NULL) {
 			mReadCallback();
 		}
 	}
     
 	// 写事件处理
-	if ( mActiveEvents & POLLOUT)
-	{
-		if (mWriteCallback != NULL)
-		{
+	if ( mActiveEvents & POLLOUT) {
+		if (mWriteCallback != NULL) {
 			mWriteCallback();
 		}
 	}	
@@ -96,8 +94,12 @@ void EventChannel::update()
 	mEventLoop->updateEventChannel(this);
 }
 
-void EventChannel::tie(const boost::shared_ptr<void>& tie)
+void EventChannel::tie(const std::shared_ptr<void>& tie)
 {
 	mTie = tie;
 	mTied = true;
 }
+
+
+
+}  // ~moon

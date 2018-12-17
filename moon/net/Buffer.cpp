@@ -1,3 +1,11 @@
+/**
+  Copyright 2018, Mugui Zhou. All rights reserved.
+  Use of this source code is governed by a BSD-style license 
+  that can be found in the License file.
+
+  Author: Mugui Zhou
+*/
+
 #include <moon/net/Buffer.h>
 #include <moon/net/SocketOps.h>
 
@@ -33,17 +41,12 @@ int Buffer::readFd(int fd)
 	vec[1].iov_base = extrabuf;
 	vec[1].iov_len = sizeof (extrabuf);
 
-	const ssize_t iRead = sockets::readv(fd, vec, 2);
-	if (iRead <= 0)
-	{
+	const int iRead = static_cast<int>(sockets::readv(fd, vec, 2));
+	if (iRead <= 0) {
 	    return iRead;
-	}
-	else if ((size_t)iRead <= writable)
-	{
+	} else if (iRead <= static_cast<int>(writable)) {
 		this->hasWritten(iRead);   // has written iRead bytes		
-	}
-	else
-	{
+	} else {
 		mWriteIndex = mBuffer.size();
 		this->append(extrabuf, iRead - writable);
 	}
@@ -62,8 +65,7 @@ void Buffer::append(const char* data, size_t len)
 
 void Buffer::ensureWritableBytes(size_t len)
 {
-	if (this->writableBytes() < len)
-	{
+	if (this->writableBytes() < len) {
 		this->makeSpace(len);
 	}
 
@@ -74,13 +76,10 @@ void Buffer::ensureWritableBytes(size_t len)
 void Buffer::makeSpace(size_t len)
 {
 	bool isExpansion = (this->writableBytes() + this->prependableBytes()) < (len + kCheapPrepend);
-	if (isExpansion)
-	{
+	if (isExpansion) {
 		// expand the size
 		mBuffer.resize(mWriteIndex + len);
-	}
-	else
-	{
+	} else {
 		assert(kCheapPrepend < mReadIndex);
         
 		// move readable data to the front

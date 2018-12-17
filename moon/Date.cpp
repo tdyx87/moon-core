@@ -8,8 +8,12 @@ namespace moon  {
 static const int MONTH_PER_YEAR = 12;
 static const char MONTH_DAYS[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-static inline long floordiv(long a, int b) {
-    return (a - (a < 0 ? b - 1 : 0)) / b;
+//static inline long floordiv(long a, int b) {
+//    return (a - (a < 0 ? b - 1 : 0)) / b;
+//}
+
+static inline int floordiv(long a, int b) {
+    return static_cast<int>((a - (a < 0 ? b - 1 : 0)) / b);
 }
 
 static inline int floordiv(int a, int b) {
@@ -23,7 +27,7 @@ static inline long getJulianDayNumber(int year, int month, int day) {
 	}
 
 	int a = floordiv(14 - month, 12);
-    long y = (long)year + 4800 - a;
+    long y = static_cast<long>(year) + 4800 - a;
     int m = month + 12 * a - 3;
     return day + floordiv(153 * m + 2, 5) + 365 * y + floordiv(y, 4) - floordiv(y, 100) + floordiv(y, 400) - 32045;
 }
@@ -48,7 +52,7 @@ static YearMonthDay getDateFromJulianDay(long julianDay)
 {	
 	long a = julianDay + 32044;
     long b = floordiv(4 * a + 3, 146097);
-    int  c = a - floordiv(146097 * b, 4);
+    int  c = static_cast<int>(a - floordiv(146097 * b, 4));
 
     int    d = floordiv(4 * c + 3, 1461);
     int    e = c - floordiv(1461 * d, 4);
@@ -56,7 +60,7 @@ static YearMonthDay getDateFromJulianDay(long julianDay)
 
     int    day = e - floordiv(153 * m + 2, 5) + 1;
     int    month = m + 3 - 12 * floordiv(m, 10);
-    int    year = 100 * b + d - 4800 + floordiv(m, 10);
+    int    year = static_cast<int>(100 * b + d - 4800 + floordiv(m, 10));
 
     // Adjust for no year 0
     if (year <= 0){
@@ -106,9 +110,9 @@ int Date::dayOfWeek() const
 	}
 
     if (mJulianDayNumber >= 0){
-        return (mJulianDayNumber % 7) + 1;
+        return static_cast<int>((mJulianDayNumber % 7) + 1);
 	}
-    return ((mJulianDayNumber + 1) % 7) + 7;
+    return static_cast<int>(((mJulianDayNumber + 1) % 7) + 7);
 }
 
 int Date::dayOfYear() const
@@ -117,7 +121,7 @@ int Date::dayOfYear() const
 		return 0;
 	}
 
-	return mJulianDayNumber - getJulianDayNumber(year(), 1, 1) + 1;
+	return static_cast<int>(mJulianDayNumber - getJulianDayNumber(year(), 1, 1) + 1);
 }
 
 int Date::daysInMonth() const
