@@ -9,6 +9,7 @@
 #ifndef MOON_SLICE_H_
 #define MOON_SLICE_H_
  
+#include <moon/copyable.h>
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
@@ -24,7 +25,7 @@ namespace moon
   在多线程环境下，Slice对象的const方法都是线程安全的。Slice对象的非const方法不是线程安全的，
   在多线程环境下需要使用额外的线程同步机制。
 */
-class Slice
+class Slice : copyable
 {
 public:
 	Slice() : mData(NULL), mSize(0) {}

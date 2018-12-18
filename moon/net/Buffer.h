@@ -8,9 +8,9 @@
 #ifndef MOON_NET_BUFFER_H_
 #define MOON_NET_BUFFER_H_
 
+#include <moon/Slice.h>
 
 #include <assert.h>
-
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -96,6 +96,14 @@ public:
 		return result;
 	}
     
+    Slice retrieveAsSlice(size_t len)
+    {
+    	assert(len <= this->readableBytes());
+        Slice s(this->data(), len);
+        this->retrieve(len);
+        return s;
+    }
+
 	// 将指针@data所指字符数组中的前@len个字符拷贝到buffer中 
     void append(const char* data, size_t len);	
     

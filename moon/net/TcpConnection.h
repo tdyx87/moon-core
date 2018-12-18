@@ -51,17 +51,18 @@ public:
 	Buffer& outPutBuffer() {return mOutputBuffer;}
     
 private:	
-	void setConnectionCallback(const ConnectionCallback& cb) { mConnectionCallback = cb; }
-    void setMessageCallback(const MessageCallback& cb) { mMessageCallback = cb; }
-    void setCloseCallback(const CloseCallback& cb)  { mCloseCallback = cb; }
+	void setConnectionCallback(const OnConnectionCallback& cb) { mConnectionCb = cb; }
+    void setMessageCallback(const OnMessageCallback& cb) { mMessageCb = cb; }
+    void setCloseCallback(const OnCloseCallback& cb)  { mCloseCb = cb; }
+    void setGetMessageLengthCallback(const OnGetMessageLengthCallback& cb){ mGetMessageLengthCb = cb; }
 
     void connectEstablished();	
     void connectDestroyed(); 
 
-    virtual void onClose();
-    virtual void onRead();
-    virtual void onWrite();
-    virtual void onError();
+    void handleClose();
+    void handleRead();
+    void handleWrite();
+    void handleError();
 	  
 	void sendInLoop();
 	void sendInLoop(const void* message, size_t len);
@@ -71,13 +72,11 @@ private:
     friend class TcpServer;
     friend class Server;
 
-    State mState;  // connection state
+    State mState;  
     EventLoop *mEventLoop;
-	std::string mName;  // connection name
-
+	std::string mName;  
 	std::unique_ptr<Socket> mSocket;	
 	std::unique_ptr<EventChannel> mEventChannel;
-
     const InetAddress mLocalAddress;
     const InetAddress mPeerAddress;
 	
@@ -85,9 +84,10 @@ private:
     Buffer mOutputBuffer; 
 	Buffer mSaveDataBuffer;
 
-	ConnectionCallback mConnectionCallback;  // 创建连接回调函数
-	MessageCallback mMessageCallback;        // 消息可读回调函数
-	CloseCallback mCloseCallback;            // 关闭连接回调函数
+	OnConnectionCallback mConnectionCb;  // 创建连接回调函数
+	OnMessageCallback mMessageCb;        // 消息可读回调函数
+	OnCloseCallback mCloseCb;            // 关闭连接回调函数
+	OnGetMessageLengthCallback mGetMessageLengthCb;
 	
 };
 

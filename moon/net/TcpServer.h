@@ -43,25 +43,20 @@ public:
 	void start();
 
 	/** setting callback functions */
-	void setConnectionCallback(const ConnectionCallback& cb){ mConnectionCallback = cb; }
-	void setMessageCallback(const MessageCallback& cb){ mMessageCallback = cb; }
+	void setConnectionCallback(const OnConnectionCallback& cb){ mConnectionCb = cb; }
+	void setMessageCallback(const OnMessageCallback& cb){ mMessageCb = cb; }
+	void setGetMessageLengthCallback(const OnGetMessageLengthCallback& cb){ mGetMessageLengthCb = cb; }
     
 	// for test
 	size_t connecionSize()const {return mTcpConnection.size();}
 private:
-	/** 
-    * Called when a connection is completed, this call is not thread safe, but in loop
-    */
+	/** Called when a connection is completed, this call is not thread safe, but in loop */
 	void onNewConnection(int fd, const InetAddress& peerAddr);
-    
-	/** 
-    * Called when a connection is disconnected, this call is thread safe
-    */
+
+	/** Called when a connection is disconnected, this call is thread safe */
     void onRemoveConnection(const TcpConnectionPtr& conn);
     
-	/** 
-    * Called when a connection is disconnected, this call is not thread safe, but in loop
-    */
+	/** Called when a connection is disconnected, this call is not thread safe, but in loop */
 	void onRemoveConnectionInLoop(const TcpConnectionPtr& conn);
 private:
 	std::string mNameArg;
@@ -69,8 +64,9 @@ private:
 	EventLoop* mEventLoop;   
 	bool mIsStarted;
 
-	ConnectionCallback mConnectionCallback;
-    MessageCallback mMessageCallback;
+	OnConnectionCallback mConnectionCb;
+    OnMessageCallback mMessageCb;
+    OnGetMessageLengthCallback mGetMessageLengthCb;
 	ThreadInitCallback mThreadInitCallback;
     
 	std::shared_ptr<EventLoopThreadPool> mThreadPool;

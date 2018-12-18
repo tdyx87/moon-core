@@ -22,21 +22,24 @@ namespace moon
 {
 namespace net
 {
-
 using std::string;
 
-
-void defaultConnectionCallback(const TcpConnectionPtr& conn)
+void defaultConnectionCallback(const TcpConnectionPtr& conn, bool connected)
 {
 	LOGGER_TRACE("fd[%d]name:%s %s -> %s is %s", conn->getFd(), conn->getName().c_str(), conn->getLocalAddress().toIpPort().c_str(), conn->getPeerAddress().toIpPort().c_str(),
-		conn->isConnected()?"UP":"DOWN");
+		connected ? "UP":"DOWN");
 }
 
-void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer &buf)
+void defaultMessageCallback(const TcpConnectionPtr& conn, const Slice &s)
 {                      
-	string data = buf.retrieveAllAsString();
-    LOGGER_TRACE("defaultMessageCallback, name:%s buf:%s", conn->getName().c_str(), data.c_str());
+	string str(s.data(), s.size());
+    LOGGER_TRACE("defaultMessageCallback, name:%s buf:%s", conn->getName().c_str(), str.c_str());
 	conn->shutdown();
+}
+
+ssize_t defaultGetMessageLengthCallback(const TcpConnectionPtr& conn, const Buffer &buffer)
+{                      
+	return static_cast<ssize_t>(buffer.readableBytes());
 }
 
 TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::string& name)
@@ -48,8 +51,9 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::
 	mNextConnId = 1;
 	mIsStarted = false;
 
-	mConnectionCallback = defaultConnectionCallback;
-	mMessageCallback = defaultMessageCallback;
+	mConnectionCb = defaultConnectionCallback;
+	mMessageCb = defaultMessageCallback;
+	mGetMessageLengthCb = defaultGetMessageLengthCallback;
 
 	mTcpAcceptor->setNewConnectionCallback(std::bind(&TcpServer::onNewConnection, this, _1, _2));
 }
@@ -92,8 +96,9 @@ void TcpServer::onNewConnection(int fd, const InetAddress& peerAddr)
 	TcpConnectionPtr conn(new TcpConnection(fd, connName, ioLoop, localAddr, peerAddr));
 	mTcpConnection[connName] = conn;
 
-	conn->setConnectionCallback(mConnectionCallback);
-	conn->setMessageCallback(mMessageCallback);
+	conn->setConnectionCallback(mConnectionCb);
+	conn->setMessageCallback(mMessageCb);
+	conn->setGetMessageLengthCallback(mGetMessageLengthCb);
 	conn->setCloseCallback(std::bind(&TcpServer::onRemoveConnection, this, _1));
     
 	// 一定要使用runInLoop,不要直接调用connectEstablished,因为可能不在当前loop所在的线程

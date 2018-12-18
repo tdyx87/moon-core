@@ -34,10 +34,10 @@ TcpConnection::TcpConnection(int sockfd, const string& name, EventLoop* loop, co
 	mState = kConnecting;
 	LOGGER_TRACE("TcpConnectio::create. state:%d", mState);
 	
-	mEventChannel->setReadCallback(std::bind(&TcpConnection::onRead, this));
-	mEventChannel->setWriteCallback(std::bind(&TcpConnection::onWrite, this));
-	mEventChannel->setCloseCallback(std::bind(&TcpConnection::onClose, this));
-	mEventChannel->setErrorCallback(std::bind(&TcpConnection::onError, this));    
+	mEventChannel->setReadCallback(std::bind(&TcpConnection::handleRead, this));
+	mEventChannel->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
+	mEventChannel->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
+	mEventChannel->setErrorCallback(std::bind(&TcpConnection::handleError, this));    
 }
 
 TcpConnection::~TcpConnection()
@@ -53,7 +53,7 @@ void TcpConnection::connectEstablished()
 
 	mEventChannel->tie(shared_from_this());
 	mEventChannel->enableReading();	
-	mConnectionCallback(shared_from_this());	
+	mConnectionCb(shared_from_this(), true);	
 }
 
 void TcpConnection::connectDestroyed()
@@ -61,28 +61,32 @@ void TcpConnection::connectDestroyed()
 	if (kConnected == mState) {
 		mState = kDisconnected;
 		mEventChannel->remove();
-		mConnectionCallback(shared_from_this());	
+		mConnectionCb(shared_from_this(), false);	
 	}
 	
 	// do nothing
 }
 
-void TcpConnection::onRead()
+void TcpConnection::handleRead()
 {
 	const ssize_t iRead = mInputBuffer.readFd(mEventChannel->getFd());
 	if (iRead > 0) {
-		if (NULL != mMessageCallback) {
-			mMessageCallback(shared_from_this(), mInputBuffer);
+		ssize_t ret = mGetMessageLengthCb(shared_from_this(), mInputBuffer);
+		if (ret > 0) {
+			Slice s = mInputBuffer.retrieveAsSlice(ret);
+            mMessageCb(shared_from_this(), s);
+		}else if (ret < 0) {
+            this->handleClose();
 		}
 	} else if (0 == iRead) {
-		this->onClose();
+		this->handleClose();
 	} else {
-		LOGGER_ERROR("TcpConnection::onRead failed.");
-		this->onClose();
+		LOGGER_ERROR("TcpConnection::handleRead failed.");
+		this->handleClose();
 	}	
 }
 
-void TcpConnection::onWrite()
+void TcpConnection::handleWrite()
 {	
 	const ssize_t iWrite = sockets::write(mEventChannel->getFd(), mOutputBuffer.data(), mOutputBuffer.readableBytes());
     if (iWrite >= 0) {
@@ -96,12 +100,11 @@ void TcpConnection::onWrite()
 			}
 		}
 	} else {
-		LOGGER_ERROR("TcpConnection::onWrite");		
-		this->onClose();
+		LOGGER_ERROR("TcpConnection::handleWrite");		
 	}
 }
 
-void TcpConnection::onClose()
+void TcpConnection::handleClose()
 {
 	assert( (kConnected == mState) || (kDisconnecting == mState) );
 
@@ -109,11 +112,11 @@ void TcpConnection::onClose()
 	mEventChannel->remove();
     
 	TcpConnectionPtr guardThis(shared_from_this());
-	mConnectionCallback(guardThis);	 // 回调连接回调函数,通知用户连接即将关闭	
-	mCloseCallback(guardThis);       // 执行关闭回调函数
+	mConnectionCb(guardThis, false);	 // 回调连接回调函数,通知用户连接即将关闭	
+	mCloseCb(guardThis);       // 执行关闭回调函数
 }
 
-void TcpConnection::onError()
+void TcpConnection::handleError()
 {
     int err = sockets::getSocketError(mEventChannel->getFd());
 	LOGGER_ERROR("TcpConnection::onError name=%s %s", mName.c_str(), strerror(err)); 

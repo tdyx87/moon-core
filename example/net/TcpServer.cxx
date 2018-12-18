@@ -28,7 +28,8 @@ int iResponse = 0;
 
 static std::string packHttpResp(char* data)
 {
-	if ((NULL == data))
+	return std::string(data);
+/*	if ((NULL == data))
 	{
 		return "";
 	}
@@ -38,6 +39,7 @@ static std::string packHttpResp(char* data)
 		    strlen(data), data);
 	
 	return std::string(httpResp);
+*/
 }
 
 static string getResponse()
@@ -52,16 +54,16 @@ void startCallback(EventLoop* loop)
 {
 	LOGGER_INFO("Loop线程启动成功");
 }
-void onClientConnection(const TcpConnectionPtr& clientConn)
+void onClientConnection(const TcpConnectionPtr& clientConn, bool connected)
 {
 	LOGGER_TRACE("连接:fd[%d] %s %s -> %s %s", clientConn->getFd(), clientConn->getName().c_str(), 
 		clientConn->getPeerAddress().toIpPort().c_str(), clientConn->getLocalAddress().toIpPort().c_str(),
-		clientConn->isConnected()?"已连接":"已断开");
+		connected ? "已连接":"已断开");
 }
 
-void onClientMessage(const TcpConnectionPtr& conn, Buffer &buf)
+void onClientMessage(const TcpConnectionPtr& conn, const Slice &s)
 {
-	string data = buf.retrieveAllAsString();
+	string data = s.toString();
 	LOGGER_DEBUG("连接:%s 接受数据:%s", conn->getName().c_str(), data.c_str());
     
 	string sendData = getResponse();
@@ -77,7 +79,7 @@ static void startServer1()
 	g_pobjTcpServer = new TcpServer(&g_objEventLoop, objInetAddress, "test");
 	g_pobjTcpServer->setThreadNum(2);
 	g_pobjTcpServer->setThreadInitCallback(std::bind(startCallback, _1));
-	g_pobjTcpServer->setConnectionCallback(std::bind(onClientConnection, _1));
+	g_pobjTcpServer->setConnectionCallback(std::bind(onClientConnection, _1, _2));
 	g_pobjTcpServer->setMessageCallback(std::bind(onClientMessage, _1, _2));
     
 	g_pobjTcpServer->start();
@@ -116,7 +118,7 @@ int main(int argc, char* argv[])
 	}
 	g_listenPortString = string(argv[1]);
 	LOGGER_TRACE("监听端口:%s", argv[1]);
-	test4();
+	startServer1();
 
 	return 0;
 }
