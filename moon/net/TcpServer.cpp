@@ -30,16 +30,11 @@ void defaultConnectionCallback(const TcpConnectionPtr& conn, bool connected)
 		connected ? "UP":"DOWN");
 }
 
-void defaultMessageCallback(const TcpConnectionPtr& conn, const Slice &s)
+void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer &buffer)
 {                      
-	string str(s.data(), s.size());
+	string str = buffer.retrieveAllAsString();
     LOGGER_TRACE("defaultMessageCallback, name:%s buf:%s", conn->getName().c_str(), str.c_str());
 	conn->shutdown();
-}
-
-ssize_t defaultGetMessageLengthCallback(const TcpConnectionPtr& conn, const Buffer &buffer)
-{                      
-	return static_cast<ssize_t>(buffer.readableBytes());
 }
 
 TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::string& name)
@@ -53,7 +48,6 @@ TcpServer::TcpServer(EventLoop* loop, const InetAddress& listenAddr, const std::
 
 	mConnectionCb = defaultConnectionCallback;
 	mMessageCb = defaultMessageCallback;
-	mGetMessageLengthCb = defaultGetMessageLengthCallback;
 
 	mTcpAcceptor->setNewConnectionCallback(std::bind(&TcpServer::onNewConnection, this, _1, _2));
 }
@@ -98,7 +92,6 @@ void TcpServer::onNewConnection(int fd, const InetAddress& peerAddr)
 
 	conn->setConnectionCallback(mConnectionCb);
 	conn->setMessageCallback(mMessageCb);
-	conn->setGetMessageLengthCallback(mGetMessageLengthCb);
 	conn->setCloseCallback(std::bind(&TcpServer::onRemoveConnection, this, _1));
     
 	// 一定要使用runInLoop,不要直接调用connectEstablished,因为可能不在当前loop所在的线程

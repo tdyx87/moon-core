@@ -42,11 +42,9 @@ public:
 
 	void start();
 
-	/** setting callback functions */
 	void setConnectionCallback(const OnConnectionCallback& cb){ mConnectionCb = cb; }
 	void setMessageCallback(const OnMessageCallback& cb){ mMessageCb = cb; }
-	void setGetMessageLengthCallback(const OnGetMessageLengthCallback& cb){ mGetMessageLengthCb = cb; }
-    
+
 	// for test
 	size_t connecionSize()const {return mTcpConnection.size();}
 private:
@@ -66,7 +64,6 @@ private:
 
 	OnConnectionCallback mConnectionCb;
     OnMessageCallback mMessageCb;
-    OnGetMessageLengthCallback mGetMessageLengthCb;
 	ThreadInitCallback mThreadInitCallback;
     
 	std::shared_ptr<EventLoopThreadPool> mThreadPool;

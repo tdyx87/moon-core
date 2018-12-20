@@ -71,13 +71,7 @@ void TcpConnection::handleRead()
 {
 	const ssize_t iRead = mInputBuffer.readFd(mEventChannel->getFd());
 	if (iRead > 0) {
-		ssize_t ret = mGetMessageLengthCb(shared_from_this(), mInputBuffer);
-		if (ret > 0) {
-			Slice s = mInputBuffer.retrieveAsSlice(ret);
-            mMessageCb(shared_from_this(), s);
-		}else if (ret < 0) {
-            this->handleClose();
-		}
+		mMessageCb(shared_from_this(), mInputBuffer);
 	} else if (0 == iRead) {
 		this->handleClose();
 	} else {

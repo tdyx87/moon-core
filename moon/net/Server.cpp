@@ -15,7 +15,6 @@
 #include <moon/net/TcpConnection.h>
 #include <moon/os/EventLoop.h>
 #include <moon/os/EventLoopThreadPool.h>
-#include <moon/os/ServiceConfig.h>
 
 #include <assert.h>
 
@@ -23,51 +22,55 @@ namespace moon
 {
 namespace net
 {
-
 using std::string;
 
-
-void defaultConnectionCallback(const TcpConnectionPtr& conn)
+void defaultConnectionCallback(const TcpConnectionPtr& conn, bool connected)
 {
 	LOGGER_TRACE("fd[%d]name:%s %s -> %s is %s", conn->getFd(), conn->getName().c_str(), conn->getLocalAddress().toIpPort().c_str(), conn->getPeerAddress().toIpPort().c_str(),
-		conn->isConnected()?"UP":"DOWN");
+		connected ? "UP":"DOWN");
 }
 
-void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer &buf)
+void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer &buffer)
 {                      
-	string data = buf.retrieveAllAsString();
-    LOGGER_TRACE("defaultMessageCallback, name:%s buf:%s", conn->getName().c_str(), data.c_str());
+	string str = buffer.retrieveAllAsString();
+    LOGGER_TRACE("name:%s message:%s", conn->getName().c_str(), str.c_str());
 	conn->shutdown();
 }
 
-Server::Server(EventLoop* loop) : mEventLoop(loop)
+Server::Server(EventLoop* loop, const InetAddress& listenAddr, const std::string& name)
+	: mNameArg(name),
+	  mEventLoop(loop),
+	  mThreadPool(new EventLoopThreadPool(loop)),
+	  mTcpAcceptor(new TcpAcceptor(loop, listenAddr, true))	 
 {
 	mNextConnId = 1;
 	mIsStarted = false;
 
-	mConnectionCallback = defaultConnectionCallback;
-	mMessageCallback = defaultMessageCallback;
+	mConnectionCb = defaultConnectionCallback;
+	mMessageCb = defaultMessageCallback;
+
+	mTcpAcceptor->setNewConnectionCallback(std::bind(&Server::onNewConnection, this, _1, _2));
 }
 
 Server::~Server()
 {
 }
 
-void Server::start(const ServiceConfig &config)
+void Server::setThreadNum(int numThreads)
 {
-	InetAddress listenAddr(config.serviceHostname().c_str(), config.servicePort());
-	mThreadPool = std::shared_ptr<EventLoopThreadPool>(new EventLoopThreadPool(mEventLoop));
-	mTcpAcceptor = std::unique_ptr<TcpAcceptor>(new TcpAcceptor(mEventLoop, listenAddr, true));	 
-	mTcpAcceptor->setNewConnectionCallback(std::bind(&Server::onNewConnection, this, _1, _2));
-    mThreadPool->setThreadNum(config.ioThreadNum());
+	assert(0 <= numThreads);
+    mThreadPool->setThreadNum(numThreads);
+}
 
-    if (!mIsStarted) {
+void Server::start()
+{
+	if (!mIsStarted) {
 		assert(!mTcpAcceptor->listenning());
 		if (mTcpAcceptor->listen() != 0) {
 			return ;
 		}
 
-		mThreadPool->start(NULL);
+		mThreadPool->start(mThreadInitCallback);
 	}
 
 	mIsStarted = true;	
@@ -87,8 +90,8 @@ void Server::onNewConnection(int fd, const InetAddress& peerAddr)
 	TcpConnectionPtr conn(new TcpConnection(fd, connName, ioLoop, localAddr, peerAddr));
 	mTcpConnection[connName] = conn;
 
-	conn->setConnectionCallback(mConnectionCallback);
-	conn->setMessageCallback(mMessageCallback);
+	conn->setConnectionCallback(mConnectionCb);
+	conn->setMessageCallback(mMessageCb);
 	conn->setCloseCallback(std::bind(&Server::onRemoveConnection, this, _1));
     
 	// 一定要使用runInLoop,不要直接调用connectEstablished,因为可能不在当前loop所在的线程

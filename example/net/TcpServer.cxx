@@ -61,9 +61,9 @@ void onClientConnection(const TcpConnectionPtr& clientConn, bool connected)
 		connected ? "已连接":"已断开");
 }
 
-void onClientMessage(const TcpConnectionPtr& conn, const Slice &s)
+void onClientMessage(const TcpConnectionPtr& conn, Buffer &buffer)
 {
-	string data = s.toString();
+	string data = buffer.retrieveAllAsString();
 	LOGGER_DEBUG("连接:%s 接受数据:%s", conn->getName().c_str(), data.c_str());
     
 	string sendData = getResponse();

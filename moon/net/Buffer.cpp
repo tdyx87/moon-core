@@ -13,11 +13,13 @@
 #include <string.h>
 
 
-using namespace moon;
-using namespace moon::net;
-
+namespace moon
+{
+namespace net
+{
 const size_t Buffer::kCheapPrepend;
 const size_t Buffer::kInitialSize;
+const char Buffer::kCRLF[] = "\r\n";
 
 Buffer::Buffer() : mBuffer(kCheapPrepend + kInitialSize)
 {
@@ -92,3 +94,6 @@ void Buffer::makeSpace(size_t len)
         assert(readable == this->readableBytes());
 	}
 }
+
+}  // ~net
+}  // ~moon

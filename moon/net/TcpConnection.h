@@ -16,6 +16,7 @@
 #include <moon/net/Socket.h>
 #include <moon/os/EventChannel.h>
 
+#include <boost/any.hpp>
 #include <memory>
 #include <string>
 
@@ -49,12 +50,15 @@ public:
 
 	Buffer& inputBuffer() {return mInputBuffer;}
 	Buffer& outPutBuffer() {return mOutputBuffer;}
+
+	void setContext(const boost::any& context) {mContext = context;}
+	const boost::any& getContext()const {return mContext;}
+	boost::any* getMutableContext(){ return &mContext; }
     
 private:	
 	void setConnectionCallback(const OnConnectionCallback& cb) { mConnectionCb = cb; }
     void setMessageCallback(const OnMessageCallback& cb) { mMessageCb = cb; }
     void setCloseCallback(const OnCloseCallback& cb)  { mCloseCb = cb; }
-    void setGetMessageLengthCallback(const OnGetMessageLengthCallback& cb){ mGetMessageLengthCb = cb; }
 
     void connectEstablished();	
     void connectDestroyed(); 
@@ -87,8 +91,8 @@ private:
 	OnConnectionCallback mConnectionCb;  // 创建连接回调函数
 	OnMessageCallback mMessageCb;        // 消息可读回调函数
 	OnCloseCallback mCloseCb;            // 关闭连接回调函数
-	OnGetMessageLengthCallback mGetMessageLengthCb;
-	
+
+	boost::any mContext;
 };
 
 

@@ -6,6 +6,7 @@ file(GLOB CORE_SOURCES_DB "database/*.cpp")
 file(GLOB CORE_SOURCES_IO "io/*.cpp")
 file(GLOB CORE_SOURCES_LOGGER "logger/*.cpp")
 file(GLOB CORE_SOURCES_NET "net/*.cpp")
+file(GLOB CORE_SOURCES_NET_HTTP "net/http/*.cpp")
 file(GLOB CORE_SOURCES_OS "os/*.cpp")
 file(GLOB CORE_SOURCES_THREAD "thread/*.cpp")
 
@@ -16,6 +17,7 @@ set(CORE_SOURCES
     ${CORE_SOURCES_IO}
     ${CORE_SOURCES_LOGGER} 
     ${CORE_SOURCES_NET} 
+    ${CORE_SOURCES_NET_HTTP} 
     ${CORE_SOURCES_OS} 
     ${CORE_SOURCES_THREAD} 
     )

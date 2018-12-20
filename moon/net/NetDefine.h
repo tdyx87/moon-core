@@ -23,12 +23,14 @@ using std::placeholders::_3;
 
 class Buffer;
 class TcpConnection;
+class TcpServer;
 
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
+typedef std::shared_ptr<TcpServer> TcpServerPtr;
+
 typedef std::function<void (const TcpConnectionPtr&, bool)> OnConnectionCallback;
 typedef std::function<void (const TcpConnectionPtr&)> OnCloseCallback;
-typedef std::function<void (const TcpConnectionPtr&, const Slice&)> OnMessageCallback;
-typedef std::function<ssize_t (const TcpConnectionPtr&, Buffer&)> OnGetMessageLengthCallback;
+typedef std::function<void (const TcpConnectionPtr&, Buffer&)> OnMessageCallback;
 
 typedef std::function<void (int sockfd)> OnNewConnectionCallback;
 

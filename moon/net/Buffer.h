@@ -104,6 +104,14 @@ public:
         return s;
     }
 
+    void retrieveUntil(const char* end)
+    {
+        assert(data() <= end);
+        assert(end <= beginWrite());
+        retrieve(end - data());
+    }
+
+
 	// 将指针@data所指字符数组中的前@len个字符拷贝到buffer中 
     void append(const char* data, size_t len);	
     
@@ -115,6 +123,20 @@ public:
 		const char* pos = std::search(this->begin(), this->beginWrite(), val.c_str(), val.c_str() + val.length());
 		return (pos == this->beginWrite()) ? NULL : pos;
 	}
+
+	const char* findCRLF() const
+    {
+        const char* crlf = std::search(data(), beginWrite(), kCRLF, kCRLF+2);
+        return crlf == beginWrite() ? NULL : crlf;
+    }
+
+    const char* findCRLF(const char* start) const
+    {
+        assert(data() <= start);
+        assert(data() <= beginWrite());
+        const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF+2);
+        return crlf == beginWrite() ? NULL : crlf;
+    }
 
 private:    
 	char* beginWrite() {return this->begin() + mWriteIndex;}
@@ -133,6 +155,7 @@ private:
 	size_t mReadIndex;    
 	size_t mWriteIndex; 
 	std::vector<char> mBuffer;    
+	static const char kCRLF[];
 
 };
 
