@@ -18,8 +18,7 @@ std::string HttpResponse::getHeader(const std::string& field) const
 {
 	std::string result;
 	std::map<string, string>::const_iterator it = mHttpHeaders.find(field);
-	if (it != mHttpHeaders.end())
-	{
+	if (it != mHttpHeaders.end()) {
 	  result = it->second;
 	}
 	return result;
@@ -27,7 +26,7 @@ std::string HttpResponse::getHeader(const std::string& field) const
 
 std::string HttpResponse::toString()
 {	
-    char buf[32];
+    char buf[32] = {0};
     snprintf(buf, sizeof buf, "HTTP/1.1 %d ", mStatusCode);
 
     string statusMessage = HttpStatusCode::getCodeInfo(mStatusCode);
@@ -36,11 +35,11 @@ std::string HttpResponse::toString()
     response.append(statusMessage);
     response.append("\r\n");
     
+    memset(buf, 0, sizeof(buf));
     snprintf(buf, sizeof buf, "Content-Length: %zd\r\n", mHttpBody.size());
     response.append(buf);
  
-    for (std::map<string, string>::const_iterator it = mHttpHeaders.begin(); it != mHttpHeaders.end(); ++it)
-    {
+    for (std::map<string, string>::const_iterator it = mHttpHeaders.begin(); it != mHttpHeaders.end(); ++it) {
         response.append(it->first);
         response.append(": ");
         response.append(it->second);

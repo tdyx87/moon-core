@@ -116,6 +116,11 @@ void TcpConnection::handleError()
 	LOGGER_ERROR("TcpConnection::onError name=%s %s", mName.c_str(), strerror(err)); 
 }
 
+void TcpConnection::send(const void *message)
+{
+    this->send(message, strlen(static_cast<const char*>(message)));
+}
+
 /** 发送数据 */
 void TcpConnection::send(const void* message, size_t len)
 {

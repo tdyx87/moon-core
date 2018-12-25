@@ -42,8 +42,9 @@ public:
 	const InetAddress& getLocalAddress() const { return mLocalAddress; }
     const InetAddress& getPeerAddress() const { return mPeerAddress; }    
 	bool isConnected() const { return kConnected == mState; }
-
-	void send(const void* message, size_t len);
+    
+    void send(const void *message);
+	void send(const void *message, size_t len);
 	void send(Buffer* message);
     
 	void shutdown(); 
