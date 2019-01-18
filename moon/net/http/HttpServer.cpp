@@ -26,6 +26,7 @@ void HttpServer::start()
 
 void HttpServer::onConnection(const TcpConnectionPtr &conn, bool connected)
 {
+    LOGGER_TRACE("fd[%d]name:%s %s -> %s is %s", conn->getFd(), conn->getName().c_str(), conn->getLocalAddress().toIpPort().c_str(), conn->getPeerAddress().toIpPort().c_str(), connected ? "UP":"DOWN");
     if (connected) {
         conn->setContext(HttpContext(&conn->inputBuffer()));
     }
@@ -37,6 +38,7 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer &buf)
 
     if (!context->parseRequest())
     {
+        LOGGER_WARN("invalid http request, could not parse it");
 		std::string str = "HTTP/1.1 400 Bad Request\r\n\r\n";
         conn->send(str.c_str(), str.length());
         conn->shutdown();

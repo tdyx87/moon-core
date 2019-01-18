@@ -79,7 +79,7 @@ static void startServer1()
 	g_pobjTcpServer = new TcpServer(&g_objEventLoop, objInetAddress, "test");
 	g_pobjTcpServer->setThreadNum(2);
 	g_pobjTcpServer->setThreadInitCallback(std::bind(startCallback, _1));
-	g_pobjTcpServer->setConnectionCallback(std::bind(onClientConnection, _1, _2));
+	//g_pobjTcpServer->setConnectionCallback(std::bind(onClientConnection, _1, _2));
 	g_pobjTcpServer->setMessageCallback(std::bind(onClientMessage, _1, _2));
     
 	g_pobjTcpServer->start();

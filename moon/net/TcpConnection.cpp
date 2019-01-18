@@ -32,7 +32,7 @@ TcpConnection::TcpConnection(int sockfd, const string& name, EventLoop* loop, co
     mPeerAddress(peerAddr)
 {
 	mState = kConnecting;
-	LOGGER_TRACE("TcpConnectio::create. state:%d", mState);
+	LOGGER_TRACE("TcpConnection::create. state:%d", mState);
 	
 	mEventChannel->setReadCallback(std::bind(&TcpConnection::handleRead, this));
 	mEventChannel->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
@@ -42,7 +42,7 @@ TcpConnection::TcpConnection(int sockfd, const string& name, EventLoop* loop, co
 
 TcpConnection::~TcpConnection()
 {		
-    LOGGER_TRACE("TcpConnectio::destroy. state:%d", mState);
+    LOGGER_TRACE("TcpConnection::destroy. state:%d", mState);
 	assert(kDisconnected == mState);
 }
 
@@ -180,7 +180,6 @@ void TcpConnection::sendInLoop(const void* message, size_t len)
     
 	assert(remaining <= len);
 	
-
 	if (remaining > 0) {
 		LOGGER_TRACE("sendInLoop send not directly");
 		mOutputBuffer.append(static_cast<const char*>(message) + iWrite, remaining);
