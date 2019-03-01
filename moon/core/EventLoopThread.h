@@ -5,8 +5,8 @@
 
   Author: Mugui Zhou
 */
-#ifndef MOON_OS_EVENTLOOPTHREAD_H_
-#define MOON_OS_EVENTLOOPTHREAD_H_
+#ifndef MOON_CORE_EVENTLOOPTHREAD_H_
+#define MOON_CORE_EVENTLOOPTHREAD_H_
 
 #include <moon/AtomicInteger.h>
 #include <moon/noncopyable.h>

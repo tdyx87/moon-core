@@ -18,10 +18,10 @@
   poll()用于等待监控队列中有事件发生的EventChannel对象集，调用方线程将处于阻塞状态直到有一个或者多个EventChannel对象的事件被触发，或者超时时间已到。
   poll()方法返回时会设置当前有事件被触发的EventChannel对象集。
 */
-#ifndef MOON_OS_POLLER_H_
-#define MOON_OS_POLLER_H_
+#ifndef MOON_CORE_POLLER_H_
+#define MOON_CORE_POLLER_H_
 
-#include <moon/os/EventLoop.h>
+#include <moon/core/EventLoop.h>
 
 #include <map>
 #include <vector>

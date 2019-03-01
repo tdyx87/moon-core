@@ -2,8 +2,8 @@
 #include <moon/net/Server1.h>
 #include <moon/net/Connection.h>
 #include <moon/Logger.h>
-#include <moon/os/EventLoop.h>
-#include <moon/os/ServiceConfig.h>
+#include <moon/core/EventLoop.h>
+#include <moon/core/ServiceConfig.h>
 #include <moon/Number.h>
 
 #include <errno.h>

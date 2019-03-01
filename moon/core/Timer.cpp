@@ -6,10 +6,10 @@
   Author: Mugui Zhou
 */
 
-#include <moon/os/Timer.h>
+#include <moon/core/Timer.h>
 
 #include <moon/Logger.h>
-#include <moon/os/EventLoop.h>
+#include <moon/core/EventLoop.h>
 
 #include <time.h>
 #include <sys/timerfd.h>

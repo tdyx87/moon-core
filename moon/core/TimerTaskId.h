@@ -6,10 +6,10 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_NET_TIMERTASKID_H_
-#define MOON_NET_TIMERTASKID_H_
+#ifndef MOON_CORE_TIMERTASKID_H_
+#define MOON_CORE_TIMERTASKID_H_
 
-#include <moon/os/TimerTask.h>
+#include <moon/core/TimerTask.h>
 
 namespace moon 
 {

@@ -6,14 +6,14 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_EVENTLOOP_H_
-#define MOON_OS_EVENTLOOP_H_
+#ifndef MOON_CORE_EVENTLOOP_H_
+#define MOON_CORE_EVENTLOOP_H_
 
 #include <moon/Functor.h>
 #include <moon/noncopyable.h>
 #include <moon/Timestamp.h>
-#include <moon/os/TimerCallback.h>
-#include <moon/os/TimerTaskId.h>
+#include <moon/core/TimerCallback.h>
+#include <moon/core/TimerTaskId.h>
 #include <moon/thread/CurrentThread.h>
 #include <moon/thread/MutexLock.h>
 

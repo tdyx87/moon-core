@@ -24,6 +24,7 @@ using std::placeholders::_3;
 class Buffer;
 class TcpConnection;
 class TcpServer;
+class NetConnection;
 
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::shared_ptr<TcpServer> TcpServerPtr;
@@ -33,6 +34,11 @@ typedef std::function<void (const TcpConnectionPtr&)> OnCloseCallback;
 typedef std::function<void (const TcpConnectionPtr&, Buffer&)> OnMessageCallback;
 
 typedef std::function<void (int sockfd)> OnNewConnectionCallback;
+
+typedef std::shared_ptr<NetConnection> NetConnectionPtr;
+typedef std::function<void (const NetConnectionPtr&, bool)> OnNetConnectionCallback;
+typedef std::function<void (const NetConnectionPtr&)> OnNetCloseCallback;
+typedef std::function<void (const NetConnectionPtr&, Buffer&)> OnNetMessageCallback;
 
 
 

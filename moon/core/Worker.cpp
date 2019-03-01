@@ -1,9 +1,9 @@
-#include <moon/os/Worker.h>
+#include <moon/core/Worker.h>
 
 #include <moon/Logger.h>
-#include <moon/os/ScheduleJob.h>
-#include <moon/os/EventLoop.h>
-#include <moon/os/EventLoopThread.h>
+#include <moon/core/ScheduleJob.h>
+#include <moon/core/EventLoop.h>
+#include <moon/core/EventLoopThread.h>
 
 #include <assert.h>
 

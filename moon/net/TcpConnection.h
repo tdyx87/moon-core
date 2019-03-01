@@ -14,7 +14,7 @@
 #include <moon/net/NetDefine.h>
 #include <moon/net/InetAddress.h>
 #include <moon/net/Socket.h>
-#include <moon/os/EventChannel.h>
+#include <moon/core/EventChannel.h>
 
 #include <boost/any.hpp>
 #include <memory>

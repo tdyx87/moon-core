@@ -6,8 +6,8 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_EVENTLOOPTHREADPOOL_H_
-#define MOON_OS_EVENTLOOPTHREADPOOL_H_
+#ifndef MOON_CORE_EVENTLOOPTHREADPOOL_H_
+#define MOON_CORE_EVENTLOOPTHREADPOOL_H_
 
 #include <moon/noncopyable.h>
 

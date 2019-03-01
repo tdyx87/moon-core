@@ -137,7 +137,8 @@ public:
         const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF+2);
         return crlf == beginWrite() ? NULL : crlf;
     }
-
+    
+    void ensureWritableBytes(size_t len);
 private:    
 	char* beginWrite() {return this->begin() + mWriteIndex;}
     const char* beginWrite()const {return this->begin() + mWriteIndex;}
@@ -147,7 +148,7 @@ private:
 
 	void hasWritten(size_t len){ mWriteIndex += len; }	
 
-	void ensureWritableBytes(size_t len);
+	
 
 	void makeSpace(size_t len);
 
@@ -165,4 +166,4 @@ private:
 }  // ~net
 }  // ~moon
 
-#endif  // ~MOON_NET_BUFFER_H_
+#endif  // ~

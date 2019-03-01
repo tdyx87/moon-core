@@ -6,10 +6,10 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_EPOLLPOLLER_H_
-#define MOON_OS_EPOLLPOLLER_H_
+#ifndef MOON_CORE_EPOLLPOLLER_H_
+#define MOON_CORE_EPOLLPOLLER_H_
 
-#include <moon/os/Poller.h>
+#include <moon/core/Poller.h>
 
 #include <sys/epoll.h>
 

@@ -5,7 +5,7 @@
 #include <moon/net/TcpConnection.h>
 #include <moon/net/TcpServer.h>
 #include <moon/net/NetDefine.h>
-#include <moon/os/EventLoop.h>
+#include <moon/core/EventLoop.h>
 #include <moon/Logger.h>
 #include <moon/Number.h>
 
@@ -39,12 +39,13 @@ static void onHttpRequest(const HttpRequest &request, const TcpConnectionPtr &co
 
 static void startServer(const std::string &configPath)
 {
-    if (ServerLoader::getInstance().load(&gEventLoop, configPath) != 0) {
+    TcpServerPtr server = ServerLoader::load(&gEventLoop, configPath);
+    if (!server) {
     	LOGGER_ERROR("load server failed");
         return ;
     }
 
-    gHttpServer = new HttpServer(ServerLoader::getInstance().getServer());
+    gHttpServer = new HttpServer(server);
     gHttpServer->setHttpCallback(std::bind(&onHttpRequest, _1, _2));
     gHttpServer->start();
     gEventLoop.loop();

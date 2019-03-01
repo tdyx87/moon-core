@@ -1,7 +1,7 @@
-#ifndef MOON_OS_SCHEDULERIMPL_H_
-#define MOON_OS_SCHEDULERIMPL_H_
+#ifndef MOON_CORE_SCHEDULERIMPL_H_
+#define MOON_CORE_SCHEDULERIMPL_H_
 
-#include <moon/os/Scheduler.h>
+#include <moon/core/Scheduler.h>
 
 #include <map>
 #include <vector>

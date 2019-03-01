@@ -13,8 +13,8 @@
 #include <moon/net/SocketOps.h>
 #include <moon/net/TcpAcceptor.h>
 #include <moon/net/TcpConnection.h>
-#include <moon/os/EventLoop.h>
-#include <moon/os/EventLoopThreadPool.h>
+#include <moon/core/EventLoop.h>
+#include <moon/core/EventLoopThreadPool.h>
 
 #include <assert.h>
 

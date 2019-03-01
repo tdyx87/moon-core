@@ -7,8 +7,8 @@
 */
 
 #include <moon/Logger.h>
-#include <moon/os/EventChannel.h>
-#include <moon/os/EventLoop.h>
+#include <moon/core/EventChannel.h>
+#include <moon/core/EventLoop.h>
 
 #include <assert.h>
 #include <poll.h>

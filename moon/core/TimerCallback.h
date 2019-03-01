@@ -6,8 +6,8 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_NET_TIMERCALLBACK_H_
-#define MOON_NET_TIMERCALLBACK_H_
+#ifndef MOON_CORE_TIMERCALLBACK_H_
+#define MOON_CORE_TIMERCALLBACK_H_
 
 #include <functional>
 

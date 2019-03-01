@@ -6,8 +6,8 @@
   Author: Mugui Zhou
 */
 
-#include <moon/os/EventLoop.h>
-#include <moon/os/EventLoopThread.h>
+#include <moon/core/EventLoop.h>
+#include <moon/core/EventLoopThread.h>
 
 #include <assert.h>
 #include <stdio.h>

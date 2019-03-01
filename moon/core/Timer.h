@@ -6,12 +6,12 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_NET_TIMER_H_
-#define MOON_NET_TIMER_H_
+#ifndef MOON_CORE_TIMER_H_
+#define MOON_CORE_TIMER_H_
 
 #include <moon/AtomicInteger.h>
-#include <moon/os/EventChannel.h>
-#include <moon/os/TimerTaskId.h>
+#include <moon/core/EventChannel.h>
+#include <moon/core/TimerTaskId.h>
 
 #include <stdint.h>
 #include <map>

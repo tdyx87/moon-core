@@ -12,14 +12,8 @@ namespace net
 {
 class ServerLoader
 {
-	ServerLoader();
 public:
-	static ServerLoader& getInstance();
-
-	int load(EventLoop *loop, const std::string &configPath);
-	TcpServerPtr getServer();
-private:
-	TcpServerPtr mServer;
+	static TcpServerPtr load(EventLoop *loop, const std::string &configPath);
 
 };  //~ ServerLoader
 

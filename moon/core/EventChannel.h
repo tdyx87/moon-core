@@ -5,8 +5,8 @@
 
   Author: Mugui Zhou
 */
-#ifndef MOON_OS_EVENTCHANNEL_H_
-#define MOON_OS_EVENTCHANNEL_H_
+#ifndef MOON_CORE_EVENTCHANNEL_H_
+#define MOON_CORE_EVENTCHANNEL_H_
 
 #include <moon/noncopyable.h>
 #include <functional>

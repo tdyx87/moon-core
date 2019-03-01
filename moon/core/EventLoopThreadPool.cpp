@@ -6,11 +6,11 @@
   Author: Mugui Zhou
 */
 
-#include <moon/os/EventLoopThreadPool.h>
+#include <moon/core/EventLoopThreadPool.h>
 
 #include <moon/TypeCast.h>
-#include <moon/os/EventLoop.h>
-#include <moon/os/EventLoopThread.h>
+#include <moon/core/EventLoop.h>
+#include <moon/core/EventLoopThread.h>
 
 #include <assert.h>
 

@@ -12,11 +12,11 @@
 
 */
 
-#ifndef MOON_NET_TIMERTASK_H_
-#define MOON_NET_TIMERTASK_H_
+#ifndef MOON_CORE_TIMERTASK_H_
+#define MOON_CORE_TIMERTASK_H_
 
 #include <moon/Timestamp.h>
-#include <moon/os/TimerCallback.h>
+#include <moon/core/TimerCallback.h>
 
 #include <stdint.h>
 

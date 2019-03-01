@@ -6,8 +6,8 @@
   Author: Mugui Zhou
 */
 
-#include <moon/os/EpollPoller.h>
-#include <moon/os/EventChannel.h>
+#include <moon/core/EpollPoller.h>
+#include <moon/core/EventChannel.h>
 #include <moon/Logger.h>
 #include <moon/TypeCast.h>
 

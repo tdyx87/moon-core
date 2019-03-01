@@ -6,8 +6,8 @@
   Author: Mugui Zhou
 */
 
-#ifndef MOON_OS_SCHEDULEJOB_H_
-#define MOON_OS_SCHEDULEJOB_H_
+#ifndef MOON_CORE_SCHEDULEJOB_H_
+#define MOON_CORE_SCHEDULEJOB_H_
 
 #include <moon/Functor.h>
 #include <moon/noncopyable.h>
